@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { db } from './firebase';  // Assure-toi que firebase.js est configuré correctement
-import firebase from 'firebase/app';
-import 'firebase/storage'; // Pour l'upload d'images
+import { db, auth } from './firebase.js';  // Assure-toi que firebase.js est configuré correctement
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // Nouvelles fonctions à importer
+
 
 const MaterialForm = () => {
   // États pour stocker les données du formulaire
@@ -13,48 +14,59 @@ const MaterialForm = () => {
 
   // Fonction pour uploader l'image sur Firebase Storage
   const uploadImage = async (file) => {
-    const storageRef = firebase.storage().ref();
-    const fileRef = storageRef.child(file.name);
-    await fileRef.put(file); // Upload le fichier sur Firebase
-    return await fileRef.getDownloadURL(); // Retourne l'URL de téléchargement de l'image
-  };
+    const storage = getStorage(); // Initialisation du service de stockage
+    const storageRef = ref(storage, file.name); // Référence de fichier basée sur son nom
+    // Upload le fichier sur Firebase Storage
+    await uploadBytes(storageRef, file);
+    // Retourne l'URL de téléchargement de l'image une fois l'upload terminé
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  }
 
   // Fonction pour ajouter un matériau dans Firestore
   const addMaterial = async (e) => {
-    e.preventDefault(); // Empêche le rafraîchissement de la page
-    setUploading(true);
+    const user = auth.currentUser; // Récupérer l'utilisateur connecté
+    if(user)
+    {
+        e.preventDefault(); // Empêche le rafraîchissement de la page
+        setUploading(true);
 
-    // Si une image est sélectionnée, on la télécharge
-    let imageUrl = '';
-    if (image) {
-      try {
-        imageUrl = await uploadImage(image);
-      } catch (error) {
-        console.error('Erreur lors de l\'upload de l\'image :', error);
-      }
+        // Si une image est sélectionnée, on la télécharge
+        let imageUrl = '';
+        if (image) {
+        try {
+            imageUrl = await uploadImage(image);
+        } catch (error) {
+            console.error('Erreur lors de l\'upload de l\'image :', error);
+        }
+        }
+
+        try {
+            // Ajoute le document dans Firestore
+            await addDoc(collection(db, 'materials'), {
+            name,
+            description,
+            dimensions,
+            imageUrl, // URL de l'image téléchargée
+            createdAt: serverTimestamp(), // Date actuelle générée par Firestore
+            userId: user.uid // Associer l'utilisateur au matériau
+            });
+        
+            alert('Matériau ajouté avec succès !');
+            setName(''); // Réinitialise le formulaire
+            setDescription('');
+            setDimensions('');
+            setImage(null);
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout du matériau :', error);
+        } finally {
+            setUploading(false);
+        }
+    }
+    else {
+        alert("Vous devez être connecté pour ajouter un matériau");
     }
 
-    // Ajout des données du matériau dans Firestore
-    db.collection('materials').add({
-      name,
-      description,
-      dimensions,
-      imageUrl, // URL de l'image téléchargée
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(), // Date actuelle
-    })
-    .then(() => {
-      alert('Matériau ajouté avec succès !');
-      setName(''); // Réinitialise le formulaire
-      setDescription('');
-      setDimensions('');
-      setImage(null);
-    })
-    .catch((error) => {
-      console.error('Erreur lors de l\'ajout du matériau :', error);
-    })
-    .finally(() => {
-      setUploading(false);
-    });
   };
 
   return (
