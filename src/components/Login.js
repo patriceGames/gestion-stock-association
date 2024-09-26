@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { login } from './firebase';
+import SignUp from './SignUp';
 
 function Login({setConnected}){
     const [email, setEmail] = useState('');
@@ -21,14 +22,28 @@ function Login({setConnected}){
         setConnected(true);
     };
 
+    const [signUpOpened, setSignUpOpened] = useState(false);
 
     return (
-        <div>
-            <form onSubmit={handleLogin}>
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button type="submit">Connexion</button>
-            </form>
+        <div>{
+          !signUpOpened ? (
+            <div>
+              <form onSubmit={handleLogin}>
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <button type="submit">Connexion</button>
+              </form>
+              <button onClick={() => setSignUpOpened(true)}>Créer un compte</button>
+            </div>
+          )
+          :
+          (
+            <div>
+              <SignUp />
+              <button onClick={() => setSignUpOpened(false)}>Retour</button>
+            </div>
+          )
+        }
         </div>
     )
 }

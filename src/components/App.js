@@ -1,10 +1,8 @@
 import '../styles/App.css';
 import {useState, useEffect} from 'react';
 import {onAuthStateChanged} from 'firebase/auth'; // Import Firebase Auth
-import { auth, logout } from './firebase'; // Assure-toi que firebase.js est bien configuré
-import SignUp from './SignUp';
-import Login from './Login';
-import MaterialForm from './MaterialForm';
+import { auth } from './firebase'; // Assure-toi que firebase.js est bien configuré
+import UserPanel from './UserPanel';
 import MaterialList from './MaterialList';
 
 function App() {
@@ -33,24 +31,10 @@ function App() {
 
   return (
     <div className="App">
-      {
-        !connected ? (
-          <div>
-            <SignUp />
-            <br />
-            <Login setConnected={setConnected} />
-          </div>
-        )
-        :
-        (
-          <div>
-            <MaterialForm />
-            <MaterialList />
-            <button onClick={logout}>Déconnexion</button>
-
-          </div>
-        )
-      }
+      <UserPanel connected={connected} setConnected={setConnected} />
+      <div>
+        <MaterialList />
+      </div>
     </div>
   );
 }
