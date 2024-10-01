@@ -1,43 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { db, DeleteMaterial } from './firebase';  // Assure-toi que firebase.js est bien configuré
-import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, getDocs } from "firebase/firestore";
 import MaterialListItem from './MaterialListItem';
-
 
 const MaterialList = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
 
-    // Fonction pour récupérer les matériaux depuis Firestore
-    useEffect(() => {
-        let q = query(collection(db, 'materials'), orderBy('createdAt', 'desc')); // Crée la requête avec tri par date
-    
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const materialsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-                }));
-            setMaterials(materialsData);
-            setLoading(false);
-        });
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      const storedMaterials = localStorage.getItem('materials');
+      if (storedMaterials) {
+        setMaterials(JSON.parse(storedMaterials));
+        setLoading(false);
+      } else {
+        let q = query(collection(db, 'materials'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const materialsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setMaterials(materialsData);
+        localStorage.setItem('materials', JSON.stringify(materialsData));
+        setLoading(false);
+      }
+    };
 
-        // Nettoyage de l'abonnement lors de la fermeture du composant
-        return () => unsubscribe();
-    }, []);
+    fetchMaterials();
+  }, []);
 
-    
   if (loading) {
     return <h2>Chargement des matériaux...</h2>;
   }
+
   return (
     <div>
-      <h1>Liste des Matériaux</h1>
       {materials.length === 0 ? (
         <p>Aucun matériau disponible pour le moment.</p>
       ) : (
-        <ul>
+        <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
           {materials.map((material) => (
-            MaterialListItem({ material, DeleteMaterial })
+            <MaterialListItem key={material.id} material={material} DeleteMaterial={DeleteMaterial} />
           ))}
         </ul>
       )}

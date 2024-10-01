@@ -27,7 +27,7 @@ function Login({setConnected}){
     return (
         <div>{
           !signUpOpened ? (
-            <div>
+            <div> 
               <form onSubmit={handleLogin}>
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
