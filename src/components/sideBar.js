@@ -8,7 +8,7 @@ function RightSidebar({isSidebarOpen, toggleSidebar, content}) {
       <div
         className={`fixed top-0 right-0 h-full bg-gray-800 text-white p-6 transform ${
             isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-          } transition-transform duration-500 ease-in-out z-50 w-full md:w-1/3`} // Full width on small screens
+          } transition-transform duration-500 ease-in-out z-50 w-full md:w-80`} // Full width on small screens
         >
           <button onClick={toggleSidebar} className="fixed top-0 right-0 m-4 text-red-500">
             Close

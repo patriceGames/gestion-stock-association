@@ -14,12 +14,14 @@ function Login({setConnected}){
         e.preventDefault();
         try {
           const user = await login(email, password);
+
+          setConnected(true);
           alert(`Bienvenue ${user.email}`);
         } catch (error) {
+          setConnected(false);
           alert("Erreur lors de la connexion");
           return;
         }
-        setConnected(true);
     };
 
     const [signUpOpened, setSignUpOpened] = useState(false);

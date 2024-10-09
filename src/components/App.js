@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ProductDetail from './productDetail'; // Page des détails d'un produit
+import MaterialDetail from './MaterialDetail'; // Page des détails d'un produit
 import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase Auth
 import { auth } from './firebase'; // Assure-toi que firebase.js est bien configuré
 import UserPanel from './UserPanel';
@@ -21,7 +21,7 @@ function App() {
   // Vérifie si l'utilisateur est déjà connecté
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (user && user.emailVerified) {
         setConnected(true);
       } else {
         setConnected(false);
@@ -49,9 +49,9 @@ function App() {
         {/* Gestion des routes ici */}
         <Routes>
           {/* Page d'accueil */}
-          <Route path="/" element={<MaterialList />} />
+          <Route path="/" element={<MaterialList connected={connected}/>} />
           {/* Route dynamique pour la page de détail d'un produit */}
-          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/product/:id" element={<MaterialDetail />} />
         </Routes>
       </div>
     </Router>
