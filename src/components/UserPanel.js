@@ -1,5 +1,4 @@
 import Login from './Login';
-import MaterialForm from './MaterialForm';
 import { logout } from './firebase';
 
 function UserPanel({connected, setConnected}) {
@@ -15,9 +14,8 @@ function UserPanel({connected, setConnected}) {
         :
         (
           <div>
-            <MaterialForm />
             <br />
-            <button onClick={logout}>Déconnexion</button>
+            <button onClick={logout} className='flex right-1'>Déconnexion</button>
           </div>
         )
     }

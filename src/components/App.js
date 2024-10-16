@@ -7,6 +7,7 @@ import UserPanel from './UserPanel';
 import MaterialList from './MaterialList';
 import Header from './header';
 import SideBar from './sideBar';
+import AddMaterial from './AddMaterial';
 
 function App() {
   const [connected, setConnected] = useState(false);
@@ -47,11 +48,13 @@ function App() {
         <Header toggleSidebar={toggleSidebar} connected={connected} loginLoading={loading} />
         
         {/* Gestion des routes ici */}
-        <Routes>
+        <Routes >
           {/* Page d'accueil */}
           <Route path="/" element={<MaterialList connected={connected}/>} />
           {/* Route dynamique pour la page de détail d'un produit */}
-          <Route path="/product/:id" element={<MaterialDetail />} />
+          <Route path="/product/:id" element={<MaterialDetail connected={connected}/>} />
+          <Route path="/product/add" element={<AddMaterial />} />
+          <Route path="*" element={<h1>404 - Page non trouvée</h1>} /> 
         </Routes>
       </div>
     </Router>

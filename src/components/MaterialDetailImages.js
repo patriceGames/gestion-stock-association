@@ -30,7 +30,7 @@ function MaterialDetailImages({ images }) {
   return (
     <div className="flex flex-col md:flex-row h-80 ">
       {/* Couverture, première image */}
-      <div className="w-full md:w-3/4 h-3/4 md:h-full">
+      <div className="w-full min-w-80 md:w-3/4 h-3/4 md:h-full">
         <img
           src={images[0]}
           alt="Cover"

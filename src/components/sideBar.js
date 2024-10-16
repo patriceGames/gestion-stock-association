@@ -13,7 +13,7 @@ function RightSidebar({isSidebarOpen, toggleSidebar, content}) {
           <button onClick={toggleSidebar} className="fixed top-0 right-0 m-4 text-red-500">
             Close
           </button>
-        <h2 className="text-xl font-bold mb-4">Right Sidebar</h2>
+        <h2 className="text-xl font-bold mb-4">User</h2>
         <ul>
           {content}
         </ul>

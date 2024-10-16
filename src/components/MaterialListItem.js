@@ -1,30 +1,35 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // Import Firestore
-import { db , auth} from "./firebase";
+import { db, auth } from "./firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Fonctions Firestore
 
 function MaterialListItem({ material, connected }) {
   // Ajoute l'ID de l'utilisateur
   const navigate = useNavigate();
   const [isFavorited, setIsFavorited] = useState(false); // État pour suivre si le matériau est favori
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
 
   const user = auth.currentUser;
-  const userId = user.uid;
+  const userId = user?.uid; // Ajouter l'opérateur conditionnel pour éviter une erreur si l'utilisateur n'est pas connecté
 
   useEffect(() => {
-    // Charger l'état des favoris au montage du composant
+    if (!userId || !material.id) return;
+
     const loadFavoriteStatus = async () => {
-      if (userId && material.id) {
+      try {
         const userRef = doc(db, "users", userId); // Référence à l'utilisateur dans Firestore
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          // Vérifier si le matériau est déjà dans les favoris de l'utilisateur
           if (userData.favorites && userData.favorites.includes(material.id)) {
             setIsFavorited(true);
           }
         }
+      } catch (error) {
+        console.error("Erreur lors du chargement des favoris :", error);
+      } finally {
+        setIsLoadingFavorite(false);
       }
     };
     loadFavoriteStatus();
@@ -33,9 +38,6 @@ function MaterialListItem({ material, connected }) {
   // Fonction pour gérer le clic sur le bouton favori
   const handleFavoriteClick = async (e) => {
     e.stopPropagation(); // Empêche de déclencher l'événement de redirection
-    setIsFavorited(!isFavorited);
-
-    console.log("user ID:", userId, "Material ID:", material.id); // À ajouter dans MaterialListItem
 
     if (userId && material.id) {
       const userRef = doc(db, "users", userId); // Référence à l'utilisateur dans Firestore
@@ -44,18 +46,24 @@ function MaterialListItem({ material, connected }) {
         const userData = userDoc.data();
         let updatedFavorites = userData.favorites || [];
 
+        let updatedIsFavorited;
         if (isFavorited) {
           // Retirer des favoris
           updatedFavorites = updatedFavorites.filter(
             (fav) => fav !== material.id
           );
+          updatedIsFavorited = false;
         } else {
           // Ajouter aux favoris
           updatedFavorites.push(material.id);
+          updatedIsFavorited = true;
         }
 
         // Mettre à jour Firestore
         await updateDoc(userRef, { favorites: updatedFavorites });
+
+        // Mettre à jour l'état après la réussite de l'opération Firestore
+        setIsFavorited(updatedIsFavorited);
       }
     }
   };
@@ -81,15 +89,21 @@ function MaterialListItem({ material, connected }) {
         {
           /* Icône de cœur pour les favoris */
           connected ? (
-            <button
-              onClick={handleFavoriteClick}
-              className="absolute top-2 right-2 text-white bg-white p-2 rounded-full"
-            >
-              {isFavorited ? "❤️" : "🤍"}{" "}
-              {/* Icône pleine si favori, vide sinon */}
-            </button>
+            isLoadingFavorite ? (
+              <button className="absolute top-2 right-2 text-white bg-white p-2 rounded-full">
+                {/* Icône de chargement */}
+                🔄
+              </button>
+            ) : (
+              <button
+                onClick={handleFavoriteClick}
+                className="absolute top-2 right-2 text-white bg-white p-2 rounded-full"
+                aria-label={isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"}
+              >
+                {isFavorited ? "❤️" : "🤍"}
+              </button>
+            )
           ) : null
-
         }
       </div>
       <div className="px-5 py-3">
