@@ -8,8 +8,8 @@ import {
   signOut,
   sendEmailVerification,
 } from "firebase/auth";
-import { getStorage, deleteObject, ref } from "firebase/storage";
-import { deleteDoc, doc, getDoc, setDoc, updateDoc} from "firebase/firestore";
+import { getStorage, deleteObject, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { deleteDoc, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCK4tKHZdzwwX9lAGpuvAcLc2-ztPEc_Pg",
@@ -157,8 +157,66 @@ async function DeleteMaterial(material) {
   }
 }
 
+
+
+
 //read
 //Fonction pour lire la liste des matériaux
+
+
+
+// Fonction pour uploader l'image sur Firebase Storage
+const uploadImage = async (file) => {
+  try {
+    const storage = getStorage(); // Initialisation du service de stockage
+
+    // Crée une référence dans le dossier 'images' avec le nom de fichier
+    const uniqueName = `${Date.now()}-${file.name}`;
+    const storageRef = ref(storage, `images/${uniqueName}`);
+    
+    // Upload du fichier sur Firebase Storage
+    await uploadBytes(storageRef, file);
+
+    // Récupère l'URL de téléchargement de l'image après l'upload
+    const downloadURL = await getDownloadURL(storageRef);
+    
+    return downloadURL;
+  } catch (error) {
+    console.error("Erreur lors de l'upload de l'image :", error);
+    return '';
+  }
+};
+
+// Fonction pour ajouter un entrepôt dans Firestore
+export const addStorage = async (companyId, storageData) => {
+  const storagesRef = collection(db, 'companies', companyId, 'storages');
+  const newDoc = await addDoc(storagesRef, storageData);
+  return newDoc.id;
+};
+
+// Fonction pour mettre à jour un entrepôt dans Firestore
+export const updateStorage = async (companyId, storageId, updatedData) => {
+  const storageDocRef = doc(db, 'companies', companyId, 'storages', storageId);
+  await updateDoc(storageDocRef, updatedData);
+};
+
+// Fonction pour supprimer un entrepôt dans Firestore
+export const deleteStorage = async (companyId, storageId) => {
+  const storageDocRef = doc(db, 'companies', companyId, 'storages', storageId);
+  await deleteDoc(storageDocRef);
+};
+
+// Fonction pour récupérer tous les entrepôts pour une entreprise
+export const getStorages = async (companyId) => {
+  const storagesRef = collection(db, 'companies', companyId, 'storages');
+  const querySnapshot = await getDocs(storagesRef);
+  const storages = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return storages;
+};
+
 
 /**
  * Ajoute ou retire un produit des favoris de l'utilisateur.
@@ -225,4 +283,5 @@ export {
   DeleteMaterial,
   GetMaterialById,
   ToggleFavorite,
+  uploadImage,
 };

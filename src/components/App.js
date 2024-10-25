@@ -8,6 +8,8 @@ import MaterialList from './MaterialList';
 import Header from './header';
 import SideBar from './sideBar';
 import AddMaterial from './AddMaterial';
+import CompanyDetail from './CompanyDetail';
+import StorageDetail from './StorageDetail';
 
 function App() {
   const [connected, setConnected] = useState(false);
@@ -37,7 +39,7 @@ function App() {
   // Contenu de la barre latérale
   const sidebarContent = (
     <div>
-      <UserPanel connected={connected} setConnected={setConnected} />
+      <UserPanel connected={connected} setConnected={setConnected}/>
     </div>
   );
 
@@ -51,10 +53,23 @@ function App() {
         <Routes >
           {/* Page d'accueil */}
           <Route path="/" element={<MaterialList connected={connected}/>} />
+          <Route path="/materials" element={<MaterialList connected={connected}/>} />
+
           {/* Route dynamique pour la page de détail d'un produit */}
           <Route path="/product/:id" element={<MaterialDetail connected={connected}/>} />
           <Route path="/product/add" element={<AddMaterial />} />
+          <Route path="/product/add" element={<AddMaterial />} />
+          
+          {/* Route dynamique pour la page de détail d'une entreprise */}
+          <Route path="/company/:id" element={<CompanyDetail connected={connected}/>} /> 
+          {/* Route pour la page des détails du hangar */}
+          <Route path="/company/:companyId/storage/:storageId" element={<StorageDetail />} />
+          {/* Route pour la page du produit dans le hangar */}
+          <Route path="/company/:companyId/storage/:storageId/product/:id" element={<MaterialDetail connected={connected}/>} />
+
           <Route path="*" element={<h1>404 - Page non trouvée</h1>} /> 
+
+
         </Routes>
       </div>
     </Router>

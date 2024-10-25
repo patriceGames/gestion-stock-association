@@ -7,6 +7,7 @@ function ProductCard({ connected, material, images}) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
+  const [showShareBox, setShowShareBox] = useState(false);
 
   const user = auth.currentUser;
   const userId = user?.uid;
@@ -67,8 +68,16 @@ function ProductCard({ connected, material, images}) {
   };
 
   const shareProduct = () => {
-    // Logic to share product link
-    console.log('Product link shared');
+    setShowShareBox(true);
+  };
+
+  const copyToClipboard = () => {
+    const productLink = `${window.location.origin}/product/${material.id}`;
+    navigator.clipboard.writeText(productLink).then(() => {
+      alert('Lien copié dans le presse-papiers !');
+    }).catch((error) => {
+      console.error('Erreur lors de la copie du lien :', error);
+    });
   };
 
   if (!material) {
@@ -81,7 +90,7 @@ function ProductCard({ connected, material, images}) {
       <div className="relative flex flex-col">
         {/* Main Image */}
         <div className="flex-1">
-          <div className="relative w-full h-96 overflow-hidden">
+          <div className="relative w-full h-[500px] overflow-hidden">
             <img
               className="w-full h-full object-cover cursor-pointer"
               src={images[currentImageIndex]}
@@ -149,6 +158,33 @@ function ProductCard({ connected, material, images}) {
           {/* Flèche de droite */}
           <button className="absolute right-4 text-white text-4xl" onClick={nextImage}>
             &#10095;
+          </button>
+        </div>
+      )}
+
+      {/* Share Box */}
+      {showShareBox && (
+        <div className="fixed top-1/4 left-1/2 transform -translate-x-1/2 w-96 bg-white p-4 rounded shadow-lg">
+          <h2 className="text-lg font-bold mb-4">Partager ce produit</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={`${window.location.origin}/product/${material.id}`}
+              readOnly
+              className="flex-1 p-2 border border-gray-300 rounded"
+            />
+            <button
+              onClick={copyToClipboard}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Copier
+            </button>
+          </div>
+          <button
+            className="mt-4 text-gray-500 underline"
+            onClick={() => setShowShareBox(false)}
+          >
+            Fermer
           </button>
         </div>
       )}

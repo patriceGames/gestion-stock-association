@@ -1,42 +1,53 @@
 import logo from "../assets/Logo_small.webp";
+//import { useState } from "react"; // Pour gérer l'état
 import { useNavigate } from "react-router-dom";
 
 function Header({ toggleSidebar, connected, loginLoading }) {
   const navigate = useNavigate();
+  //const [searchQuery, setSearchQuery] = useState(''); // Gérer l'état de la recherche
+
   const navigateHome = () => {
-    // Redirige vers la page du produit en utilisant son ID
-    navigate(``);
+    // Redirige vers la page d'accueil
+    navigate(`/`);
   };
 
   const navigateAddMaterial = () => {
-    // Redirige vers la page du produit en utilisant son ID
+    // Redirige vers la page d'ajout de matériau
     navigate(`/product/add`);
   };
+  
+  //const handleSearch = (e) => {
+  //  if (e.key === 'Enter' || e.type === 'click') {
+  //    // Redirige vers la liste des matériaux avec la recherche comme paramètre de requête
+  //    navigate(`/materials?search=${searchQuery}`);
+  //  }
+  //}; 
 
   return (
     <div className="bg-white">
       <div className="m-3">
         <div className="flex justify-between">
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={navigateHome}
-          >
+          <div className="flex items-center cursor-pointer" onClick={navigateHome}>
             <img src={logo} alt="Logo" className="h-8 w-8" />
             <span className="ml-2 font-semibold text-base">Réemploi</span>
           </div>
-
+        {/* 
           <div className="ml-6 flex flex-1 gap-x-3">
             <input
               type="text"
               className="w-full rounded-md border border-green-500 px-3 py-2 text-sm"
-              value="DJI phantom"
-              onChange={(e) => {}}
+              placeholder="Rechercher un matériau..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)} // Mettre à jour la requête de recherche
+              onKeyPress={handleSearch} // Appuyer sur 'Enter' pour rechercher
             />
-          </div>
+          </div>*/}
 
           <div className="ml-2 flex">
-            <div className="flex m-1 cursor-pointer items-center gap-x-1 rounded-md py-2 px-4 bg-green-500 hover:bg-gray-100"
-              onClick={navigateAddMaterial}>
+            <div
+              className="flex m-1 cursor-pointer items-center gap-x-1 rounded-md py-2 px-4 bg-green-500 hover:bg-gray-100"
+              onClick={navigateAddMaterial}
+            >
               <span className="text-3xl font-medium">+</span>
             </div>
 

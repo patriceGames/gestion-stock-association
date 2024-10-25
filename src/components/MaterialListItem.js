@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { db, auth } from "./firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Fonctions Firestore
 
-function MaterialListItem({ material, connected }) {
+function MaterialListItem({ material, connected, storageView, companyId, storageId }) {
   // Ajoute l'ID de l'utilisateur
   const navigate = useNavigate();
   const [isFavorited, setIsFavorited] = useState(false); // État pour suivre si le matériau est favori
@@ -70,7 +70,7 @@ function MaterialListItem({ material, connected }) {
 
   const handleClick = () => {
     // Redirige vers la page du produit en utilisant son ID
-    navigate(`/product/${material.id}`);
+    navigate(storageView ? `/company/${companyId}/storage/${storageId}/product/${material.id}` : `/product/${material.id}` );
   };
 
   return (
