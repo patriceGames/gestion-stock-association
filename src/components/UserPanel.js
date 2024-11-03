@@ -1,9 +1,8 @@
-import Login from './Login';
-import { logout, auth, db } from './firebase';
-import { useEffect, useState } from 'react';
-import { getDoc, doc } from 'firebase/firestore';
+import { logout, auth, db } from "./firebase";
+import { useEffect, useState } from "react";
+import { getDoc, doc, collection, getDocs } from "firebase/firestore";
 
-function UserPanel({ connected, setConnected }) {
+function UserPanel({ connected, setConnected, toggleSidebar}) {
   const [companyId, setCompanyId] = useState(null);
   const user = auth.currentUser; // Récupérer l'utilisateur connecté
 
@@ -12,16 +11,22 @@ function UserPanel({ connected, setConnected }) {
       // Récupérer les informations de l'utilisateur depuis la collection "users"
       const fetchUserData = async () => {
         try {
-          const userDocRef = doc(db, 'users', user.uid);
+          const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            const userData = userDoc.data();
-            if (userData.companyId) {
-              setCompanyId(userData.companyId);
+            // recherche du lien de la société
+            const usersCollectionRef = collection(db, 'companies');
+            const companies = await getDocs(usersCollectionRef);
+          
+            if (!usersCollectionRef.empty) {
+              setCompanyId(companies.docs[0].id)
             }
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données de l'utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des données de l'utilisateur :",
+            error
+          );
         }
       };
       fetchUserData();
@@ -35,25 +40,28 @@ function UserPanel({ connected, setConnected }) {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    toggleSidebar();
+  }
+
   return (
     <div>
-      {!connected ? (
-        <div>
-          <br />
-          <Login setConnected={setConnected} />
-        </div>
-      ) : (
-        <div>
-          <br />
-          <button onClick={logout} className=''>Déconnexion</button>
-          {companyId && (
-            <div>
-              <br />
-              <button onClick={handleCompanyClick} className=''>Accéder à la page de l'entreprise</button>
-            </div>
-          )}
-        </div>
-      )}
+      <div>
+        {companyId && (
+          <div>
+            <br />
+            <button onClick={handleCompanyClick} className="">
+              Accéder à la page de l'entreprise
+            </button>
+          </div>
+        )}
+
+        <br />
+        <button onClick={handleLogout} className="">
+          Déconnexion
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,23 +1,23 @@
 import React from 'react';
 import MaterialFormImageLoader from './MaterialFormImageLoader';
 
-const Images = ({ image1, setImage1, image2, setImage2, image3, setImage3, image4, setImage4, image5, setImage5 }) => {
+const Images = ({ formData, handleChange }) => {
   return (
     <ul className="my-4 grid gap-6 grid-cols-2 mt-6">
       <div>
-        <MaterialFormImageLoader inputId="imageDownloader1" image={image1} setImage={setImage1} />
+        <MaterialFormImageLoader inputId="imageDownloader1" image={formData.image1} name="image1" handleChange={handleChange} />
       </div>
       <div>
-        <MaterialFormImageLoader inputId="imageDownloader2" image={image2} setImage={setImage2} />
+        <MaterialFormImageLoader inputId="imageDownloader2" image={formData.image2} name="image2" handleChange={handleChange} />
       </div>
       <div>
-        <MaterialFormImageLoader inputId="imageDownloader3" image={image3} setImage={setImage3} />
+        <MaterialFormImageLoader inputId="imageDownloader3" image={formData.image3} name="image3" handleChange={handleChange} />
       </div>
       <div>
-        <MaterialFormImageLoader inputId="imageDownloader4" image={image4} setImage={setImage4} />
+        <MaterialFormImageLoader inputId="imageDownloader4" image={formData.image4} name="image4" handleChange={handleChange} />
       </div>
       <div>
-        <MaterialFormImageLoader inputId="imageDownloader5" image={image5} setImage={setImage5} />
+        <MaterialFormImageLoader inputId="imageDownloader5" image={formData.image5} name="image5" handleChange={handleChange} />
       </div>
     </ul>
   );

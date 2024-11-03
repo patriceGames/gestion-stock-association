@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { db, auth } from "./firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore"; // Fonctions Firestore
 
-function MaterialListItem({ material, connected, storageView, companyId, storageId }) {
+function MaterialListItem({ material, storageView, companyId, storageId }) {
   // Ajoute l'ID de l'utilisateur
   const navigate = useNavigate();
   const [isFavorited, setIsFavorited] = useState(false); // État pour suivre si le matériau est favori
@@ -70,7 +70,11 @@ function MaterialListItem({ material, connected, storageView, companyId, storage
 
   const handleClick = () => {
     // Redirige vers la page du produit en utilisant son ID
-    navigate(storageView ? `/company/${companyId}/storage/${storageId}/product/${material.id}` : `/product/${material.id}` );
+    navigate(
+      storageView
+        ? `/company/${companyId}/storage/${storageId}/product/${material.id}`
+        : `/product/${material.id}`
+    );
   };
 
   return (
@@ -88,27 +92,31 @@ function MaterialListItem({ material, connected, storageView, companyId, storage
       >
         {
           /* Icône de cœur pour les favoris */
-          connected ? (
-            isLoadingFavorite ? (
-              <button className="absolute top-2 right-2 text-white bg-white p-2 rounded-full">
-                {/* Icône de chargement */}
-                🔄
-              </button>
-            ) : (
-              <button
-                onClick={handleFavoriteClick}
-                className="absolute top-2 right-2 text-white bg-white p-2 rounded-full"
-                aria-label={isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"}
-              >
-                {isFavorited ? "❤️" : "🤍"}
-              </button>
-            )
-          ) : null
+
+          isLoadingFavorite ? (
+            <button className="absolute top-2 right-2 text-white bg-white p-2 rounded-full">
+              {/* Icône de chargement */}
+              🔄
+            </button>
+          ) : (
+            <button
+              onClick={handleFavoriteClick}
+              className="absolute top-2 right-2 text-white bg-white p-2 rounded-full"
+              aria-label={
+                isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"
+              }
+            >
+              {isFavorited ? "❤️" : "🤍"}
+            </button>
+          )
         }
       </div>
       <div className="px-5 py-3">
-        <h3 className="text-gray-700 uppercase">{material.name}</h3>
-        <span className="text-gray-500 mt-2">{material.price + " €"}</span>
+        <h3 className="text-gray-700 font-bold uppercase">{material.name}</h3>
+        {/* Affichage de l'état du produit */}
+        <p className="text-gray-600">État : {material.condition}</p>
+        {/* Affichage de la quantité disponible */}
+        <p className="text-gray-600">Quantité : {material.quantity}</p>
       </div>
     </li>
   );

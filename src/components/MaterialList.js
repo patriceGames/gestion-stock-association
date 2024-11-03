@@ -4,7 +4,7 @@ import { fetchMaterials } from './MaterialQueries';  // Import de la fonction de
 import MaterialGrid from "./MaterialGrid";
 import Categories from "./Categories";
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 20;
 
 function MaterialList({ connected, storageView = false, companyId, storageId }) {
   const [materials, setMaterials] = useState([]);
@@ -13,7 +13,6 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
   const [categoryFilter, setCategoryFilter] = useState("");
   const [subcategoryFilter, setSubcategoryFilter] = useState("");
   const [lastVisible, setLastVisible] = useState(null);  // Suivi du dernier élément visible pour la pagination
-  const [page, setPage] = useState(1);  // Numéro de la page actuelle
 
   const searchQuery = searchParams.get('search');  // Obtenir la valeur du paramètre 'search'
 
@@ -43,23 +42,13 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
 
   // Charger les matériaux à chaque changement de filtre ou lors de l'initialisation
   useEffect(() => {
-    setPage(1);  // Réinitialiser la page à 1 lors du changement de filtre
     loadMaterials(false);  // Charger les matériaux pour la première page ou un nouveau filtrage
   }, [loadMaterials]);
 
   // Charger la page suivante
   const loadNextPage = () => {
     if (lastVisible) {
-      setPage(prevPage => prevPage + 1);  // Passer à la page suivante
       loadMaterials(true, lastVisible);  // Charger les matériaux à partir du dernier visible
-    }
-  };
-
-  // Charger la page précédente (remettre à jour pour la première page)
-  const loadPreviousPage = () => {
-    if (page > 1) {
-      setPage(prevPage => prevPage - 1);  // Revenir à la page précédente
-      loadMaterials(false, null);  // Charger les matériaux de la page précédente (on n'utilise pas `lastVisible` ici)
     }
   };
 
@@ -115,13 +104,9 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
       <MaterialGrid materials={materials} connected={connected} storageView={storageView} companyId={companyId} storageId={storageId}/>
 
       {/* Pagination controls */}
-      <div className="flex justify-between mt-4">
-        <button onClick={loadPreviousPage} disabled={page === 1}>
-          Page précédente
-        </button>
-        <span>Page {page}</span>
-        <button onClick={loadNextPage} disabled={materials.length < PAGE_SIZE}>
-          Page suivante
+      <div className="flex justify-center mt-10">
+        <button onClick={loadNextPage} hidden={materials.length < PAGE_SIZE}>
+            Charger plus
         </button>
       </div>
     </div>

@@ -1,19 +1,21 @@
-import React from 'react';
-import Categories from '../Categories';
+import React from "react";
+import Categories from "../Categories";
 
-const BasicInfo = ({ name, setName, category, setCategory, subcategory, setSubcategory }) => {
+const BasicInfo = ({ formData, handleChange }) => {
+  const { name, category, subcategory } = formData; // Déstructuration pour plus de clarté
+
   return (
     <>
       <div className="relative z-0 mb-6 w-full group">
         <input
           type="text"
-          name="floating_name"
+          name="name" // Assurez-vous que le nom correspond à la clé dans formData
           id="floating_name"
           className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder=" "
           required
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleChange} // Utilisez handleChange pour gérer le changement
         />
         <label
           htmlFor="floating_name"
@@ -26,14 +28,14 @@ const BasicInfo = ({ name, setName, category, setCategory, subcategory, setSubca
       <div className="flex space-x-4">
         <div className="relative z-0 mb-6 w-full group">
           <select
-            name="floating_category"
+            name="category" // Correspond à la clé formData.category
             id="floating_category"
             className="block pl-2 py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
             required
             value={category}
             onChange={(e) => {
-              setCategory(e.target.value);
-              setSubcategory('');  // Réinitialiser la sous-catégorie
+              handleChange(e); // Met à jour la catégorie
+              handleChange({ target: { name: "subcategory", value: "" } }); // Réinitialise la sous-catégorie
             }}
           >
             <option value=""></option>
@@ -55,11 +57,11 @@ const BasicInfo = ({ name, setName, category, setCategory, subcategory, setSubca
       {category && (
         <div className="relative z-0 mb-6 w-full group">
           <select
-            name="floating_subcategory"
+            name="subcategory" // Correspond à la clé formData.subcategory
             id="floating_subcategory"
             className="block pl-2 py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
             value={subcategory}
-            onChange={(e) => setSubcategory(e.target.value)}
+            onChange={handleChange}
           >
             <option value=""></option>
             {Categories.find((catGroup) => catGroup.group === category)?.subcategories.map((subcat) => (

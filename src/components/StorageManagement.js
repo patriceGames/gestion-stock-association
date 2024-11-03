@@ -3,7 +3,7 @@ import { addStorage, updateStorage, deleteStorage, getStorages, uploadImage } fr
 import StorageList from './StorageList';  // Import de la liste
 import StorageForm from './StorageForm';  // Import du formulaire
 
-function StorageManagement({ companyId }) {
+function StorageManagement({ companyId, currentUserDetail }) {
   const [storages, setStorages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false); // Gérer l'état du pop-up
@@ -90,7 +90,6 @@ function StorageManagement({ companyId }) {
 
   return (
     <div>
-      <h1>Gestion des entrepôts</h1>
 
       {/* Affichage de la liste des entrepôts */}
       <StorageList storages={storages} onEditClick={(storage) => {
@@ -101,9 +100,11 @@ function StorageManagement({ companyId }) {
       }} companyId={companyId}/>
 
       {/* Bouton pour ajouter un nouvel entrepôt */}
-      <button onClick={() => { setShowPopup(true); setIsEditing(false); }} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+      {currentUserDetail?.role === 'admin' && (
+        <button onClick={() => { setShowPopup(true); setIsEditing(false); }} 
+        className="bg-[#EC751A] hover:bg-[#009EE0] text-white px-4 py-2 rounded mt-4">
         Ajouter un entrepôt
-      </button>
+      </button>)}
 
       {/* Pop-up pour ajouter ou modifier un entrepôt */}
       {showPopup && (

@@ -3,13 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MaterialDetail from './MaterialDetail'; // Page des détails d'un produit
 import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase Auth
 import { auth } from './firebase'; // Assure-toi que firebase.js est bien configuré
-import UserPanel from './UserPanel';
 import MaterialList from './MaterialList';
 import Header from './header';
 import SideBar from './sideBar';
-import AddMaterial from './AddMaterial';
 import CompanyDetail from './CompanyDetail';
 import StorageDetail from './StorageDetail';
+import MaterialFormContainer from './MaterialFormContainer';
+import Login from './Login';
 
 function App() {
   const [connected, setConnected] = useState(false);
@@ -36,40 +36,35 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Contenu de la barre latérale
-  const sidebarContent = (
-    <div>
-      <UserPanel connected={connected} setConnected={setConnected}/>
-    </div>
-  );
-
   return (
     <Router>
       <div className="App">
-        <SideBar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} content={sidebarContent} />
-        <Header toggleSidebar={toggleSidebar} connected={connected} loginLoading={loading} />
-        
-        {/* Gestion des routes ici */}
-        <Routes >
-          {/* Page d'accueil */}
-          <Route path="/" element={<MaterialList connected={connected}/>} />
-          <Route path="/materials" element={<MaterialList connected={connected}/>} />
+      {connected && (
+            <>
+        <SideBar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+        <Header toggleSidebar={toggleSidebar} loginLoading={loading} />
+          </>)}
 
-          {/* Route dynamique pour la page de détail d'un produit */}
-          <Route path="/product/:id" element={<MaterialDetail connected={connected}/>} />
-          <Route path="/product/add" element={<AddMaterial />} />
-          <Route path="/product/add" element={<AddMaterial />} />
-          
-          {/* Route dynamique pour la page de détail d'une entreprise */}
-          <Route path="/company/:id" element={<CompanyDetail connected={connected}/>} /> 
-          {/* Route pour la page des détails du hangar */}
-          <Route path="/company/:companyId/storage/:storageId" element={<StorageDetail />} />
-          {/* Route pour la page du produit dans le hangar */}
-          <Route path="/company/:companyId/storage/:storageId/product/:id" element={<MaterialDetail connected={connected}/>} />
-
-          <Route path="*" element={<h1>404 - Page non trouvée</h1>} /> 
-
-
+        {/* Gestion des routes */}
+        <Routes>
+          {connected ? (
+            <>
+              {/* Routes pour les utilisateurs connectés */}
+              <Route path="/" element={<MaterialList />} />
+              <Route path="/materials" element={<MaterialList/>} />
+              <Route path="/product/:id" element={<MaterialDetail/>} />
+              <Route path="/product/:materialId/edit" element={<MaterialFormContainer/>} />
+              <Route path="/product/add" element={<MaterialFormContainer/>} />
+              <Route path="/company/:id" element={<CompanyDetail/>} />
+              <Route path="/company/:companyId/storage/:storageId" element={<StorageDetail />} />
+              <Route path="/company/:companyId/storage/:storageId/product/:id" element={<MaterialFormContainer/>} />
+              <Route path="/company/:companyId/storage/:storageId/product/:materialId/edit" element={<MaterialFormContainer />} />
+            </>
+          ) : (
+            <Route path="*" element={<Login connected={connected} setConnected={setConnected}/>} />
+          )}
+          {/* Route de secours pour les pages non trouvées */}
+          <Route path="*" element={<h1>404 - Page non trouvée</h1>} />
         </Routes>
       </div>
     </Router>

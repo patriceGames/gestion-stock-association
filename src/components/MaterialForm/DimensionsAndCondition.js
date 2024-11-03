@@ -1,17 +1,19 @@
 import React from 'react';
 
-const DimensionsAndCondition = ({ dimensions, setDimensions, condition, setCondition }) => {
+const DimensionsAndCondition = ({ formData, handleChange }) => {
+  const { dimensions, condition } = formData; // Déstructuration pour obtenir les valeurs
+
   return (
     <>
       <div className="relative z-0 mb-6 w-full group">
         <input
           type="text"
-          name="floating_dimensions"
+          name="dimensions" // Correspond à la clé dans formData
           id="floating_dimensions"
           className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder=" "
           value={dimensions}
-          onChange={(e) => setDimensions(e.target.value)}
+          onChange={handleChange} // Utilise handleChange pour gérer les changements
           required
         />
         <label
@@ -24,11 +26,11 @@ const DimensionsAndCondition = ({ dimensions, setDimensions, condition, setCondi
 
       <div className="relative z-0 mb-6 w-full group">
         <select
-          name="floating_condition"
+          name="condition" // Correspond à la clé dans formData
           id="floating_condition"
           className="block pl-2 py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           value={condition}
-          onChange={(e) => setCondition(e.target.value)}
+          onChange={handleChange}
           required
         >
           <option value=""></option>

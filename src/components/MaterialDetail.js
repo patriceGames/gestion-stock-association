@@ -31,16 +31,18 @@ function MaterialDetail({ connected }) {
   return (
     <div className="bg-neutral-100">
       <div className="p-5">
-        {/* Flèche de retour vers le hangar */}
-        <button
-          onClick={() => navigate(`/company/${companyId}/storage/${storageId}`)}
-          className="flex items-center text-blue-500 mb-4"
-        >
-          <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Retour au hangar
-        </button>
+        {/* Flèche de retour vers le hangar seulement si companyId est présent */}
+        {companyId && (
+          <button
+            onClick={() => navigate(`/company/${companyId}/storage/${storageId}`)}
+            className="flex items-center text-blue-500 mb-4"
+          >
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour au hangar
+          </button>
+        )}
 
         {material ? (
           <ProductCard connected={connected} material={material} images={images} />

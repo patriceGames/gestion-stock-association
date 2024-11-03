@@ -45,15 +45,24 @@ async function login(email, password) {
       if (!userDoc.exists()) {
         // Ajouter l'utilisateur à la collection 'users' dans Firestore
         await setDoc(doc(db, "users", user.uid), {
-          valid: false, // Initialiser à false pour attendre la vérification de l'email
           email: user.email,
           favorites: [], // Initialiser avec une liste de favoris vide
           //...userInfo, // Autres informations de l'utilisateur (nom, etc.)
         });
       }
 
-      alert("Connexion réussie !");
-      return user;
+      const roleRef = doc(db, "roles", user.uid); // Référence à l'utilisateur dans Firestore
+      const roleDoc = await getDoc(roleRef);
+      //vérifie que l'email a bien été validé par les administrateurs
+      if(roleDoc.exists() && roleDoc.role !== "none")
+      {
+        console.log("Connexion réussie !");
+        return user;
+      }
+      else {
+        alert("Votre compte n'a pas encore été validé par les administrateurs, veuillez les contacter.");
+        throw new Error("Email non validé");
+      }
     } else {
       alert("Veuillez vérifier votre email avant de vous connecter.");
       throw new Error("Email non vérifié");
@@ -128,19 +137,18 @@ async function GetMaterialById(id) {
 
 //delete
 // Fonction pour supprimer un matériau
-async function DeleteMaterial(material) {
+async function DeleteMaterial(materialId) {
   try {
-    const materialRef = doc(db, "materials", material.id);
-    await deleteDoc(materialRef);
+    const materialRef = doc(db, "materials", materialId);
 
     // Supprimer les images de Firebase Storage
 
     const imageUrls = [
-      material.imageUrl1,
-      material.imageUrl2,
-      material.imageUrl3,
-      material.imageUrl4,
-      material.imageUrl5,
+      materialRef.imageUrl1,
+      materialRef.imageUrl2,
+      materialRef.imageUrl3,
+      materialRef.imageUrl4,
+      materialRef.imageUrl5,
     ];
 
     const storage = getStorage();
@@ -149,6 +157,8 @@ async function DeleteMaterial(material) {
       const imageRef = ref(storage, imageUrl);
       await deleteObject(imageRef);
     }
+    
+    await deleteDoc(materialRef);
 
     alert("Matériau supprimé avec succès !");
   } catch (error) {
@@ -184,6 +194,19 @@ const uploadImage = async (file) => {
   } catch (error) {
     console.error("Erreur lors de l'upload de l'image :", error);
     return '';
+  }
+};
+
+// Fonction pour supprimer une image dans Firebase Storage
+async function DeleteImage(imageUrl){
+  if (!imageUrl) return;
+  
+  try {
+    const imageRef = ref(storage, imageUrl);
+    await deleteObject(imageRef);
+    console.log('Image supprimée avec succès');
+  } catch (error) {
+    console.error('Erreur lors de la suppression de l\'image:', error);
   }
 };
 
@@ -281,6 +304,7 @@ export {
   signup,
   logout,
   DeleteMaterial,
+  DeleteImage,
   GetMaterialById,
   ToggleFavorite,
   uploadImage,

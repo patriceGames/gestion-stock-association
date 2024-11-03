@@ -1,83 +1,57 @@
-import logo from "../assets/Logo_small.webp";
-//import { useState } from "react"; // Pour gérer l'état
+import logo from "../assets/HH.png";
 import { useNavigate } from "react-router-dom";
 
-function Header({ toggleSidebar, connected, loginLoading }) {
+function Header({ toggleSidebar }) {
   const navigate = useNavigate();
-  //const [searchQuery, setSearchQuery] = useState(''); // Gérer l'état de la recherche
 
   const navigateHome = () => {
-    // Redirige vers la page d'accueil
     navigate(`/`);
   };
 
   const navigateAddMaterial = () => {
-    // Redirige vers la page d'ajout de matériau
     navigate(`/product/add`);
   };
-  
-  //const handleSearch = (e) => {
-  //  if (e.key === 'Enter' || e.type === 'click') {
-  //    // Redirige vers la liste des matériaux avec la recherche comme paramètre de requête
-  //    navigate(`/materials?search=${searchQuery}`);
-  //  }
-  //}; 
 
   return (
     <div className="bg-white">
       <div className="m-3">
         <div className="flex justify-between">
-          <div className="flex items-center cursor-pointer" onClick={navigateHome}>
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={navigateHome}
+          >
             <img src={logo} alt="Logo" className="h-8 w-8" />
-            <span className="ml-2 font-semibold text-base">Réemploi</span>
+            <span className="ml-2 font-semibold text-base">
+              Habitat et humanisme
+            </span>
           </div>
-        {/* 
-          <div className="ml-6 flex flex-1 gap-x-3">
-            <input
-              type="text"
-              className="w-full rounded-md border border-green-500 px-3 py-2 text-sm"
-              placeholder="Rechercher un matériau..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)} // Mettre à jour la requête de recherche
-              onKeyPress={handleSearch} // Appuyer sur 'Enter' pour rechercher
-            />
-          </div>*/}
 
-          <div className="ml-2 flex">
+          <div className="ml-2 flex w-full justify-between">
             <div
-              className="flex m-1 cursor-pointer items-center gap-x-1 rounded-md py-2 px-4 bg-green-500 hover:bg-gray-100"
+              className="flex px-4 m-1 cursor-pointer items-center gap-x-1 rounded-md bg-[#EC751A] hover:bg-[#009EE0]"
               onClick={navigateAddMaterial}
             >
-              <span className="text-3xl font-medium">+</span>
+              <span className="font-medium text-white">
+                + Ajouter un Produit
+              </span>
             </div>
 
             <button
-              className="py-3 px-5 m-1 flex cursor-pointer items-center gap-x-1 rounded-md bg-blue-100 hover:bg-gray-100"
+              className="py-3 px-5 m-1 flex cursor-pointer items-center gap-x-1 rounded-md bg-[#F8C9A7] hover:bg-[#ACE7FF] ml-auto"
               onClick={toggleSidebar}
             >
-              {loginLoading ? (
-                <span className="text-sm font-medium">...</span>
-              ) : connected ? (
-                <div className="relative">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full !bg-red-500 text-xs !text-white">
-                    3
-                  </span>
-                </div>
-              ) : (
-                <span className="text-sm font-medium">Sign in</span>
-              )}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a4 4 0 110 8 4 4 0 010-8zm0 10a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </button>
           </div>
         </div>

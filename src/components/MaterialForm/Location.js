@@ -1,15 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import { db, auth } from "../firebase";
+import { doc, collection, getDoc, getDocs } from "firebase/firestore";
 
-const Location = ({
-  companyId,
-  storages,
-  locationType,
-  setLocationType,
-  location,
-  setLocation,
-  selectedStorage,
-  setSelectedStorage
-}) => {
+const Location = ({ formData, handleChange }) => {
+  const [companyId, setCompanyId] = useState(null);
+  const [storages, setStorages] = useState([]);
+  const { locationType, location, selectedStorage } = formData; // Déstructuration pour accéder aux valeurs
+
+  const user = auth.currentUser;
+
+  // Fonction pour récupérer les hangars de l'entreprise de l'utilisateur
+  useEffect(() => {
+    const fetchStorages = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const companyId = userDoc.data().companyId;
+          if (companyId) {
+            setCompanyId(companyId);
+            const storagesRef = collection(db, "companies", companyId, "storages");
+            const storageQuerySnapshot = await getDocs(storagesRef);
+            const storageList = storageQuerySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setStorages(storageList);
+          }
+        }
+      }
+    };
+
+    fetchStorages();
+  }, [user]);
+
   return (
     <div className="relative z-0 mb-6 w-full group">
       {companyId ? (
@@ -23,10 +48,10 @@ const Location = ({
                 className="form-radio"
                 name="locationType"
                 value="text"
-                checked={locationType === 'text'}
-                onChange={() => setLocationType('text')}
+                checked={locationType === "text"}
+                onChange={handleChange}
               />
-              <span className="ml-2">Texte</span>
+              <span className="ml-2">Adresse</span>
             </label>
             <label className="inline-flex items-center ml-4">
               <input
@@ -34,15 +59,15 @@ const Location = ({
                 className="form-radio"
                 name="locationType"
                 value="dropdown"
-                checked={locationType === 'dropdown'}
-                onChange={() => setLocationType('dropdown')}
+                checked={locationType === "dropdown"}
+                onChange={handleChange}
               />
               <span className="ml-2">Liste des hangars</span>
             </label>
           </div>
 
           {/* Affichage du champ texte ou du dropdown */}
-          {locationType === 'text' ? (
+          {locationType === "text" ? (
             <input
               type="text"
               name="location"
@@ -50,21 +75,21 @@ const Location = ({
               className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               placeholder="Saisir la localisation"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={handleChange}
               required
             />
           ) : (
             <select
-              name="storage"
+              name="selectedStorage"
               id="storage"
               className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               value={selectedStorage}
-              onChange={(e) => setSelectedStorage(e.target.value)}  // Enregistrer le storageId ici
+              onChange={handleChange}
               required
             >
               <option value="">Sélectionner un hangar</option>
               {storages.map((storage) => (
-                <option key={storage.id} value={storage.id}>  {/* Utilisation de storage.id */}
+                <option key={storage.id} value={storage.id}>
                   {storage.name}
                 </option>
               ))}
@@ -80,7 +105,7 @@ const Location = ({
           className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder="Saisir la localisation"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={handleChange}
           required
         />
       )}

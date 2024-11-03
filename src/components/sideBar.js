@@ -1,21 +1,22 @@
+import UserPanel from "./UserPanel";
 
-function RightSidebar({isSidebarOpen, toggleSidebar, content}) {
+function RightSidebar({isSidebarOpen, toggleSidebar}) {
   // State to track whether the sidebar is open
 
   return (
     <div>
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full bg-gray-800 text-white p-6 transform ${
+        className={`fixed top-0 right-0 h-full bg-[#233666] text-white p-6 transform ${
             isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
           } transition-transform duration-500 ease-in-out z-50 w-full md:w-80`} // Full width on small screens
         >
-          <button onClick={toggleSidebar} className="fixed top-0 right-0 m-4 text-red-500">
+          <button onClick={toggleSidebar} className="fixed top-0 right-0 m-4 text-[#EC751A]">
             Close
           </button>
-        <h2 className="text-xl font-bold mb-4">User</h2>
+        <h2 className="text-xl text-[#009EE0] font-bold mb-4">User</h2>
         <ul>
-          {content}
+          <UserPanel toggleSidebar={toggleSidebar} />
         </ul>
       </div>
 

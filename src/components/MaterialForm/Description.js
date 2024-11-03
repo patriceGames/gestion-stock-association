@@ -1,15 +1,17 @@
 import React from 'react';
 
-const Description = ({ description, setDescription }) => {
+const Description = ({ formData, handleChange }) => {
+  const { description } = formData; // Déstructuration pour accéder à description
+
   return (
     <div className="relative z-0 mb-6 w-full group">
       <textarea
-        name="floating_description"
+        name="description" // Correspond à la clé dans formData
         id="floating_description"
         className="block py-2.5 px-0 w-full text-sm text-white-300 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={handleChange} // Utilise handleChange pour gérer les changements
         required
       />
       <label
