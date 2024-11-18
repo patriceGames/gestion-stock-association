@@ -1,43 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase";
-import { doc, collection, getDoc, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { collection, getDocs } from "firebase/firestore";
 
-const Location = ({ formData, handleChange }) => {
-  const [companyId, setCompanyId] = useState(null);
+const Location = ({ formData, handleChange, company, currentUser }) => {
   const [storages, setStorages] = useState([]);
   const { locationType, location, selectedStorage } = formData; // Déstructuration pour accéder aux valeurs
-
-  const user = auth.currentUser;
 
   // Fonction pour récupérer les hangars de l'entreprise de l'utilisateur
   useEffect(() => {
     const fetchStorages = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const companyId = userDoc.data().companyId;
-          if (companyId) {
-            setCompanyId(companyId);
-            const storagesRef = collection(db, "companies", companyId, "storages");
-            const storageQuerySnapshot = await getDocs(storagesRef);
-            const storageList = storageQuerySnapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            setStorages(storageList);
-          }
+      if (currentUser) {
+        if (company?.id) {
+          const storagesRef = collection(
+            db,
+            "companies",
+            company.id,
+            "storages"
+          );
+          const storageQuerySnapshot = await getDocs(storagesRef);
+          const storageList = storageQuerySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setStorages(storageList);
         }
       }
     };
 
     fetchStorages();
-  }, [user]);
+  }, [company, currentUser]);
 
   return (
     <div className="relative z-0 mb-6 w-full group">
-      {companyId ? (
+      {company?.id ? (
         <>
           {/* Toggle pour choisir entre champ texte et dropdown */}
           <div className="mb-4">

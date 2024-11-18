@@ -1,67 +1,29 @@
-import { logout, auth, db } from "./firebase";
-import { useEffect, useState } from "react";
-import { getDoc, doc, collection, getDocs } from "firebase/firestore";
+import { logout } from "./firebase";
+import { Link } from "react-router-dom";
 
-function UserPanel({ connected, setConnected, toggleSidebar}) {
-  const [companyId, setCompanyId] = useState(null);
-  const user = auth.currentUser; // Récupérer l'utilisateur connecté
-
-  useEffect(() => {
-    if (user) {
-      // Récupérer les informations de l'utilisateur depuis la collection "users"
-      const fetchUserData = async () => {
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            // recherche du lien de la société
-            const usersCollectionRef = collection(db, 'companies');
-            const companies = await getDocs(usersCollectionRef);
-          
-            if (!usersCollectionRef.empty) {
-              setCompanyId(companies.docs[0].id)
-            }
-          }
-        } catch (error) {
-          console.error(
-            "Erreur lors de la récupération des données de l'utilisateur :",
-            error
-          );
-        }
-      };
-      fetchUserData();
-    }
-  }, [user]);
-
-  const handleCompanyClick = () => {
-    if (companyId) {
-      // Rediriger vers la page de l'entreprise
-      window.location.href = `/company/${companyId}`;
-    }
-  };
-
+function UserPanel({ toggleSidebar, company }) {
   const handleLogout = () => {
     logout();
     toggleSidebar();
-  }
+  };
+
+  //console.log("userPanel:" + company)
 
   return (
     <div>
-      <div>
-        {companyId && (
-          <div>
-            <br />
-            <button onClick={handleCompanyClick} className="">
-              Accéder à la page de l'entreprise
-            </button>
-          </div>
-        )}
+      {company?.id && (
+        <>
+          <br />
+          <Link to={`/company/${company.id}`}>
+            Accéder à la page de l'entreprise
+          </Link>
+        </>
+      )}
 
-        <br />
-        <button onClick={handleLogout} className="">
-          Déconnexion
-        </button>
-      </div>
+      <br />
+      <button onClick={handleLogout} className="logout-button">
+        Déconnexion
+      </button>
     </div>
   );
 }

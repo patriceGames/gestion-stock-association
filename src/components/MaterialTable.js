@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faEdit } from "@fortawesome/free-solid-svg-icons";
 import MaterialForm from "./MaterialForm";
 
-function MaterialTable({ materials, companyId, storageId, onSaveMaterial }) {
+function MaterialTable({ company, currentUser, materials, storageId, currentUserDetail }) {
   const navigate = useNavigate();
 
   // État pour contrôler l'ouverture de la modale de modification
@@ -32,12 +32,12 @@ function MaterialTable({ materials, companyId, storageId, onSaveMaterial }) {
         id: "edit",
         Header: "",
         Cell: ({ row }) => (
-          <button
+          (currentUserDetail?.role === 'admin' && <button
             onClick={() => openEditPopUp(row.original)}
             className="text-blue-500 hover:underline w-1"
           >
             <FontAwesomeIcon icon={faEdit} />
-          </button>
+          </button>)
         ),
       },
       {
@@ -47,7 +47,7 @@ function MaterialTable({ materials, companyId, storageId, onSaveMaterial }) {
           <button
             onClick={() =>
               navigate(
-                `/company/${companyId}/storage/${storageId}/product/${row.original.id}`
+                `/company/${company.id}/storage/${storageId}/product/${row.original.id}`
               )
             }
             className="text-blue-500 hover:underline w-1"
@@ -57,7 +57,7 @@ function MaterialTable({ materials, companyId, storageId, onSaveMaterial }) {
         ),
       },
     ],
-    [navigate, companyId, storageId]
+    [navigate, company, storageId, currentUserDetail]
   );
 
   // Initialisation de React Table
@@ -184,6 +184,8 @@ function MaterialTable({ materials, companyId, storageId, onSaveMaterial }) {
                 <MaterialForm
                   baseMaterialId={selectedMaterial.id}
                   closeEditpopUp={closeEditpopUp}
+                  company={company}
+                  currentUser={currentUser}
                 />
               </div>
             </div>

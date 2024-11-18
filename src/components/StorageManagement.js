@@ -3,7 +3,7 @@ import { addStorage, updateStorage, deleteStorage, getStorages, uploadImage } fr
 import StorageList from './StorageList';  // Import de la liste
 import StorageForm from './StorageForm';  // Import du formulaire
 
-function StorageManagement({ companyId, currentUserDetail }) {
+function StorageManagement({ company, currentUser, currentUserDetail }) {
   const [storages, setStorages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false); // Gérer l'état du pop-up
@@ -16,7 +16,7 @@ function StorageManagement({ companyId, currentUserDetail }) {
   useEffect(() => {
     const fetchStorages = async () => {
       try {
-        const storageList = await getStorages(companyId);  // Appel à la fonction getStorages
+        const storageList = await getStorages(company.id);  // Appel à la fonction getStorages
         setStorages(storageList);
         setLoading(false);
       } catch (error) {
@@ -25,12 +25,12 @@ function StorageManagement({ companyId, currentUserDetail }) {
       }
     };
 
-    if (companyId) {
+    if (company?.Id) {
       fetchStorages();
     } else {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [company]);
 
   // Fonction pour gérer l'ajout ou la modification d'un entrepôt
   const handleAddOrEditStorage = async (e) => {
@@ -43,7 +43,7 @@ function StorageManagement({ companyId, currentUserDetail }) {
       }
 
       if (isEditing) {
-        await updateStorage(companyId, selectedStorage.id, {
+        await updateStorage(company.id, selectedStorage.id, {
           name: newStorage.name,
           address: newStorage.address,
           imageUrl,
@@ -52,7 +52,7 @@ function StorageManagement({ companyId, currentUserDetail }) {
           storage.id === selectedStorage.id ? { ...storage, ...newStorage, imageUrl } : storage
         ));
       } else {
-        const newDocId = await addStorage(companyId, {
+        const newDocId = await addStorage(company.id, {
           name: newStorage.name,
           address: newStorage.address,
           imageUrl,
@@ -74,7 +74,7 @@ function StorageManagement({ companyId, currentUserDetail }) {
   const handleDeleteStorage = async () => {
     if (selectedStorage) {
       try {
-        await deleteStorage(companyId, selectedStorage.id);  // Appel à la fonction deleteStorage
+        await deleteStorage(company.id, selectedStorage.id);  // Appel à la fonction deleteStorage
         setStorages(storages.filter(storage => storage.id !== selectedStorage.id));
         setShowPopup(false);
         setSelectedStorage(null);
@@ -97,7 +97,7 @@ function StorageManagement({ companyId, currentUserDetail }) {
         setNewStorage({ name: storage.name, address: storage.address });
         setShowPopup(true);
         setIsEditing(true);
-      }} companyId={companyId}/>
+      }} companyId={company.id}/>
 
       {/* Bouton pour ajouter un nouvel entrepôt */}
       {currentUserDetail?.role === 'admin' && (

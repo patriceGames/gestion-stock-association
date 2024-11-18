@@ -1,8 +1,8 @@
 import UserPanel from "./UserPanel";
 
-function RightSidebar({isSidebarOpen, toggleSidebar}) {
+function RightSidebar({isSidebarOpen, toggleSidebar, currentUser, company}) {
   // State to track whether the sidebar is open
-
+  //console.log("sidebar:" + company)
   return (
     <div>
       {/* Sidebar */}
@@ -16,7 +16,7 @@ function RightSidebar({isSidebarOpen, toggleSidebar}) {
           </button>
         <h2 className="text-xl text-[#009EE0] font-bold mb-4">User</h2>
         <ul>
-          <UserPanel toggleSidebar={toggleSidebar} />
+          <UserPanel toggleSidebar={toggleSidebar} currentUser={currentUser} company={company} />
         </ul>
       </div>
 

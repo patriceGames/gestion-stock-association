@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";  // Import useNavigate pour la navigation
 import { GetMaterialById } from "./firebase";
-import ProductCard from "./ProductCard";
+import MaterialCard from "./MaterialCard.js";
 
-function MaterialDetail({ connected }) {
+function MaterialDetail({ currentUser, connected }) {
   const { companyId, id, storageId } = useParams();  // Récupérer à la fois l'ID du matériau et le storageId du hangar depuis les paramètres
   const [material, setMaterial] = useState(null);
   const [images, setImages] = useState([]);
@@ -45,7 +45,7 @@ function MaterialDetail({ connected }) {
         )}
 
         {material ? (
-          <ProductCard connected={connected} material={material} images={images} />
+          <MaterialCard connected={connected} currentUser={currentUser} material={material} images={images} />
         ) : (
           <h2>Chargement...</h2>
         )}

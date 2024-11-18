@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ToggleFavorite } from "./firebase"; // Importer la fonction `toggleFavorite` depuis firebase.js
 import { auth } from "./firebase"; // Importer `auth` pour vérifier l'utilisateur connecté
+import ReservationTable from "./ReservationTable";
 
-function ProductCard({ material, images }) {
+function MaterialCard({ currentUser, material, images }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [quantityAvailable, setQuantityAvailable] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
   const [showShareBox, setShowShareBox] = useState(false);
@@ -230,7 +232,12 @@ function ProductCard({ material, images }) {
         {/* Quantity Available */}
         <div className="flex items-center text-lg mt-4">
           <span className="text-gray-700">Quantité disponible: </span>
-          <span className="ml-1 font-bold">{material.quantity}</span>
+          <span className="ml-1 font-bold">{quantityAvailable}</span>
+        </div>
+        {/* stock */}
+        <div className="flex items-center text-sm">
+          <span className="text-gray-500">En stock : </span>
+          <span className="ml-1 text-gray-500">{material.quantity}</span>
         </div>
 
         {/* Dernière modification*/}
@@ -254,10 +261,20 @@ function ProductCard({ material, images }) {
 
       {/* Footer with Date */}
       <div className="px-6 pt-4 pb-2">
-        <span className="text-gray-500 text-lg">{material.description}</span>
+        <span className="text-gray-900 text-lg">{material.description}</span>
       </div>
+      <hr />
+      <br />
+
+      <ReservationTable
+        material={material}
+        currentUser={currentUser}
+        totalQuantity={material.quantity}
+        quantityAvailable={quantityAvailable}
+        setQuantityAvailable={setQuantityAvailable}
+      />
     </div>
   );
 }
 
-export default ProductCard;
+export default MaterialCard;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { fetchMaterials } from './MaterialQueries';  // Import de la fonction de tri mutualisée
+import { getMaterials } from './firebase.js';  // Import de la fonction de tri mutualisée
 import MaterialGrid from "./MaterialGrid";
 import Categories from "./Categories";
 
@@ -20,7 +20,7 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
   const loadMaterials = useCallback(async (isNextPage = true, lastDoc = null) => {
     setLoading(true);
 
-    const materialsResponse = await fetchMaterials({
+    const materialsResponse = await getMaterials({
       categoryFilter,
       subcategoryFilter,
       limitSize: PAGE_SIZE,

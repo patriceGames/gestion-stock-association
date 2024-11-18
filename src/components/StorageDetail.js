@@ -1,22 +1,45 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDoc, doc } from 'firebase/firestore';
-import { fetchMaterials } from './MaterialQueries';
 import MaterialTable from './MaterialTable';
-import { db } from './firebase';
+import { db, getMaterials } from './firebase';
 
-function StorageDetail() {
+function StorageDetail({currentUser, company}) {
   const { storageId, companyId } = useParams();
   const navigate = useNavigate();
   const [storage, setStorage] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [company, setCompany] = useState(null);
+  const [currentUserDetail, setCurrentUserDetail] = useState(null);
+
+  useEffect(() => {
+    const fetchUserDetail = async () => {
+      try {
+        if (!currentUser) {
+          console.error('No user is currently authenticated.');
+          return;
+        }
+        const userDetailRef = doc(db, 'roles', currentUser.uid);
+        const userDetailSnapshot = await getDoc(userDetailRef);
+        if (userDetailSnapshot.exists()) {
+          setCurrentUserDetail(userDetailSnapshot.data());
+        } else {
+          console.error('User details not found.');
+          return;
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des employés :', error);
+      }
+      setLoading(false);
+    };
+  
+    fetchUserDetail();
+  }, [currentUser]);
 
   const loadMaterials = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: fetchedMaterials } = await fetchMaterials({ storageId });
+      const { data: fetchedMaterials } = await getMaterials({ storageId });
       setMaterials(fetchedMaterials);
     } catch (error) {
       console.error('Erreur lors du chargement des matériaux:', error);
@@ -28,12 +51,6 @@ function StorageDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const companyRef = doc(db, 'companies', companyId);
-        const companyDoc = await getDoc(companyRef);
-        if (companyDoc.exists()) {
-          setCompany(companyDoc.data());
-        }
-
         const storageRef = doc(db, 'companies', companyId, 'storages', storageId);
         const storageDoc = await getDoc(storageRef);
         if (storageDoc.exists()) {
@@ -77,8 +94,10 @@ function StorageDetail() {
       <h2 className="text-xl font-semibold mb-2">Matériaux stockés</h2>
       <MaterialTable 
         materials={materials} 
-        companyId={companyId} 
+        company={company} 
+        currentUser={currentUser} 
         storageId={storageId} 
+        currentUserDetail={currentUserDetail}
       />
     </div>
   );

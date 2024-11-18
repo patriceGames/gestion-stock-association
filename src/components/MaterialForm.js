@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { db, auth, DeleteMaterial } from "./firebase";
-import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { DeleteMaterial, getMaterial} from "./firebase";
 import BasicInfo from "./MaterialForm/BasicInfo";
 import PriceAndQuantity from "./MaterialForm/PriceAndQuantity";
 import DimensionsAndCondition from "./MaterialForm/DimensionsAndCondition";
@@ -12,9 +8,15 @@ import Description from "./MaterialForm/Description";
 import Images from "./MaterialForm/Images";
 import Location from "./MaterialForm/Location";
 
-import { AddMaterial, UpdateMaterial } from "./MaterialFormFunctions";
+import { AddMaterial, UpdateMaterial } from "./firebase/Material";
 
-const MaterialForm = ({ connected, baseMaterialId, closeEditpopUp }) => {
+const MaterialForm = ({
+  baseMaterialId,
+  closeEditpopUp,
+  currentUser,
+  currentUserDetail,
+  company,
+}) => {
   let { materialId } = useParams();
   if (baseMaterialId) materialId = baseMaterialId;
 
@@ -50,43 +52,34 @@ const MaterialForm = ({ connected, baseMaterialId, closeEditpopUp }) => {
   };
 
   useEffect(() => {
-    const fetchMaterial = async () => {
-      if (materialId) {
-        const materialRef = doc(db, "materials", materialId);
-        const materialDoc = await getDoc(materialRef);
-        if (materialDoc.exists()) {
-          const data = materialDoc.data();
-          setInitialImages({
-            imageUrl1: data.imageUrl1 || null,
-            imageUrl2: data.imageUrl2 || null,
-            imageUrl3: data.imageUrl3 || null,
-            imageUrl4: data.imageUrl4 || null,
-            imageUrl5: data.imageUrl5 || null,
-          });
+    const material = getMaterial(materialId);
 
-          const { cat, subcat } = splitCategory(data.category);
-          setFormData({
-            name: data.name,
-            category: cat,
-            subcategory: subcat,
-            description: data.description,
-            dimensions: data.dimensions,
-            quantity: data.quantity,
-            condition: data.condition,
-            image1: data.imageUrl1 || null,
-            image2: data.imageUrl2 || null,
-            image3: data.imageUrl3 || null,
-            image4: data.imageUrl4 || null,
-            image5: data.imageUrl5 || null,
-            locationType: data.storageId ? "dropdown" : "text",
-            location: data.location || "",
-            selectedStorage: data.storageId || "",
-          });
-        }
-      }
-    };
+    setInitialImages({
+      imageUrl1: material.imageUrl1 || null,
+      imageUrl2: material.imageUrl2 || null,
+      imageUrl3: material.imageUrl3 || null,
+      imageUrl4: material.imageUrl4 || null,
+      imageUrl5: material.imageUrl5 || null,
+    });
 
-    fetchMaterial();
+    const { cat, subcat } = splitCategory(material.category);
+    setFormData({
+      name: material.name,
+      category: cat,
+      subcategory: subcat,
+      description: material.description,
+      dimensions: material.dimensions,
+      quantity: material.quantity,
+      condition: material.condition,
+      image1: material.imageUrl1 || null,
+      image2: material.imageUrl2 || null,
+      image3: material.imageUrl3 || null,
+      image4: material.imageUrl4 || null,
+      image5: material.imageUrl5 || null,
+      locationType: material.storageId ? "dropdown" : "text",
+      location: material.location || "",
+      selectedStorage: material.storageId || "",
+    });
   }, [materialId]);
 
   const validateForm = () => {
@@ -96,7 +89,7 @@ const MaterialForm = ({ connected, baseMaterialId, closeEditpopUp }) => {
 
   const handleAddMaterial = async (e) => {
     e.preventDefault();
-    const user = auth.currentUser;
+    const user = currentUser;
 
     if (user) {
       setUploading(true);
@@ -116,7 +109,7 @@ const MaterialForm = ({ connected, baseMaterialId, closeEditpopUp }) => {
       return;
     }
 
-    const user = auth.currentUser;
+    const user = currentUser;
     if (user && materialId) {
       setUploading(true);
       UpdateMaterial(user, formData, initialImages, materialId);
@@ -139,58 +132,70 @@ const MaterialForm = ({ connected, baseMaterialId, closeEditpopUp }) => {
     }
   };
 
+  if (currentUserDetail?.role !== "admin")
+    return (
+      <p>Vous n'avez pas les droits necessaires pour modifier ce matériau</p>
+    );
+
   return (
-    <div>
-      <form
-        onSubmit={materialId ? handleUpdateMaterial : handleAddMaterial}
-        className="w-full"
-      >
-        <BasicInfo formData={formData} handleChange={handleChange} />
-        <PriceAndQuantity formData={formData} handleChange={handleChange} />
-        <DimensionsAndCondition
-          formData={formData}
-          handleChange={handleChange}
-        />
-        <Description formData={formData} handleChange={handleChange} />
-        <Images formData={formData} handleChange={handleChange} />
-        <Location formData={formData} handleChange={handleChange} />
-        <div className="flex justify-center h-15">
-          {baseMaterialId && (
+    currentUserDetail?.role === "admin" && (
+      <div>
+        <form
+          onSubmit={materialId ? handleUpdateMaterial : handleAddMaterial}
+          className="w-full"
+        >
+          <BasicInfo formData={formData} handleChange={handleChange} />
+          <PriceAndQuantity formData={formData} handleChange={handleChange} />
+          <DimensionsAndCondition
+            formData={formData}
+            handleChange={handleChange}
+          />
+          <Description formData={formData} handleChange={handleChange} />
+          <Images formData={formData} handleChange={handleChange} />
+          <Location
+            formData={formData}
+            handleChange={handleChange}
+            currentUser={currentUser}
+            company={company}
+          />
+          <div className="flex justify-center h-15">
+            {baseMaterialId && (
+              <button
+                type="button"
+                onClick={() => {
+                  closeEditpopUp();
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded ml-4"
+              >
+                Annuler
+              </button>
+            )}
             <button
-              type="button"
-              onClick={() => {
-                closeEditpopUp();
-              }}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded ml-4"
+              type="submit"
+              className="text-white bg-blue-700 hover:bg-blue-800 ml-4 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1 text-center"
+              disabled={uploading}
             >
-              Annuler
+              {materialId
+                ? uploading
+                  ? "En cours..."
+                  : "Mettre à jour"
+                : uploading
+                ? "Création en cours..."
+                : "Créer le Matériau"}
             </button>
-          )}
-          <button
-            type="submit"
-            className="text-white bg-blue-700 hover:bg-blue-800 ml-4 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1 text-center"
-            disabled={uploading}
-          >
-            {materialId
-              ? uploading
-                ? "En cours..."
-                : "Mettre à jour"
-              : uploading
-              ? "Création en cours..."
-              : "Créer le Matériau"}
-          </button>
-          {materialId && (
-            <button
-              type="button"
-              onClick={handleDeleteMaterial}
-              className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded ml-4"
-            >
-              Supprimer
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+            {materialId && (
+              <button
+                type="button"
+                onClick={handleDeleteMaterial}
+                className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded ml-4"
+              >
+                Supprimer
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    )
   );
 };
 

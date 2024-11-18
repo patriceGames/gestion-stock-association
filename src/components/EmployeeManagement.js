@@ -16,7 +16,7 @@ function EmployeeManagement({ companyId, currentUser, currentUserDetail}) {
         if (!currentUser) {
           console.error('No user is currently authenticated.');
           return;
-        }  
+        }
         const employeesRef = collection(db, 'roles');
         const employeeDocs = await getDocs(employeesRef);
         const employeeList = employeeDocs.docs.map((doc) => ({

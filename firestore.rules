@@ -40,6 +40,20 @@ service cloud.firestore {
       allow write, update, delete: if (isAdmin() && request.auth.uid != userId);
     }
     
+    // Règles pour la sous-collection "reservations" sous "materials"
+    match /materials/{materialId}/reservations/{reservationId} {
+      // Lecture pour tous les utilisateurs authentifiés
+      allow read: if request.auth != null;
+
+      // Création uniquement si la quantité demandée est inférieure ou égale à la quantité disponible dans le matériel
+      allow create: if request.auth != null && 
+                    get(/databases/$(database)/documents/materials/$(materialId)).data.quantityAvailable >= request.resource.data.quantity;
+
+      // Mise à jour ou suppression uniquement pour les administrateurs ou le créateur de la réservation
+      allow update, delete: if isAdmin() || 
+                              resource.data.userId == request.auth.uid;
+    }
+    
     // Fonction pour vérifier si l'utilisateur est un administrateur de l'entreprise
     function isAdmin() {
       return request.auth != null &&

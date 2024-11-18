@@ -116,7 +116,7 @@ function MaterialListItem({ material, storageView, companyId, storageId }) {
         {/* Affichage de l'état du produit */}
         <p className="text-gray-600">État : {material.condition}</p>
         {/* Affichage de la quantité disponible */}
-        <p className="text-gray-600">Quantité : {material.quantity}</p>
+        <p className="text-gray-600">Quantité : {material.quantityAvailable}</p>
       </div>
     </li>
   );

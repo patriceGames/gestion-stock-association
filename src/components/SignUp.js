@@ -12,7 +12,7 @@ const Signup = () => {
     try {
       // Inscription de l'utilisateur et envoi de l'email de vérification
       await signup(email, password);
-      alert("Inscription réussie ! Un email de confirmation a été envoyé.");
+      alert("Inscription réussie ! Un email de confirmation vous a été envoyé.");
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
         // Si l'email est déjà utilisé, informer l'utilisateur
