@@ -28,9 +28,9 @@ function RightSidebar({
     <div>
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full bg-[#233666] text-white p-6 flex flex-col transform ${
+        className={`fixed top-0 right-0 h-full w-full bg-[#233666] text-white p-6 flex flex-col transform ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-500 ease-in-out z-50 w-full md:w-80`}
+        } transition-transform duration-500 ease-in-out z-50 md:w-80`}
       >
         {/* Titre principal */}
         <UiTitleSecondary text={"MENU"} color={"[#009EE0]"} />
@@ -38,7 +38,7 @@ function RightSidebar({
         {/* Bouton de fermeture */}
         <button
           onClick={toggleSidebar}
-          className="fixed top-5 right-8 text-white text-2xl self-end focus:outline-none hover:text-red-400"
+          className="absolute top-5 right-8 text-white text-2xl self-end focus:outline-none hover:text-red-400"
         >
           &times;
         </button>
@@ -70,20 +70,25 @@ function RightSidebar({
             )}
           </Link>
           <Link
-            to={`/user/${currentUser.uid}`}
-            className="mt-4 flex items-center text-md font-medium hover:bg-blue-600 py-2 px-3 rounded-lg transition-all duration-200"
-          >
-            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-3" />
-            {<UiTextMedium text={"Mon Profil"} />}
-          </Link>
-          <Link
             to={`/user/${currentUser.uid}/favorites`}
             className="mt-4 flex items-center text-md font-medium hover:bg-blue-600 py-2 px-3 rounded-lg transition-all duration-200"
           >
             <FontAwesomeIcon icon={faStar} className="h-6 w-6 mr-3" />
             {<UiTextMedium text={"Mes Favoris"} />}
           </Link>
-          
+          <Link
+            to={`/user/${currentUser.uid}`}
+            className="relative mt-4 flex items-center text-md font-medium hover:bg-blue-600 py-2 px-3 rounded-lg transition-all duration-200"
+          >
+            <FontAwesomeIcon icon={faUser} className="h-6 w-6 mr-3" />
+            {<UiTextMedium text={"Mon Profil"} />}
+            
+            {alarms.profileAlarms > 0 && (
+              <span className="absolute top-0 left-0 text-sm bg-red-600 text-white px-2 rounded-full">
+                {alarms.profileAlarms}
+              </span>
+            )}
+          </Link>
         </div>
 
         {/* Groupe : Gestion */}

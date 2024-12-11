@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { UpdateUserProfile, UpdateUserPassword } from "../firebase";
-import { UiTitleMain } from "../UI/Ui";
+import { UiSecondaryCard, UiTitleMain } from "../UI/Ui";
 
 const Profile = ({ currentUser }) => {
   const [form, setForm] = useState({
@@ -53,7 +53,7 @@ const Profile = ({ currentUser }) => {
     try {
       // Validation simple
       if (!form.firstName && !form.lastName && !form.password) {
-        throw new Error("Veuillez remplir au moins un champ à modifier.");
+        throw new Error("Veuillez remplir nom et prénom");
       }
 
       // Mettre à jour le profil utilisateur
@@ -83,8 +83,7 @@ const Profile = ({ currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl p-8 mx-auto bg-white shadow-md rounded-lg">
+    <UiSecondaryCard>
         <UiTitleMain text={"Informations personnelles"} />
         {message && (
           <div
@@ -173,8 +172,7 @@ const Profile = ({ currentUser }) => {
             {loading ? "En cours..." : "Sauvegarder"}
           </button>
         </form>
-      </div>
-    </div>
+      </UiSecondaryCard>
   );
 };
 

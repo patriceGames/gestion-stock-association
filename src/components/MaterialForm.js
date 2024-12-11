@@ -75,7 +75,7 @@ const MaterialForm = ({
         subcategory: subcat,
         description: material.description,
         dimensions: material.dimensions,
-        warning: material.warning,
+        warning: material.warning || "",
         quantity: material.quantity,
         condition: material.condition,
         image1: material.imageUrl1 || null,

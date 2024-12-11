@@ -1,66 +1,71 @@
-import { doc, getDoc, updateDoc, getDocs, collection } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  getDocs,
+  collection,
+} from "firebase/firestore";
 import { db } from "./Base.js";
 
-  async function GetUserData (user) {
-    try {
-      console.log("Chargement des données utilisateur...")
-      // Récupérer les détails utilisateur depuis la collection "roles"
-      const roleDocRef = doc(db, "roles", user.email);
-      const roleDocSnapshot = await getDoc(roleDocRef);
+async function GetUserData(user) {
+  try {
+    console.log("Chargement des données utilisateur...");
+    // Récupérer les détails utilisateur depuis la collection "roles"
+    const roleDocRef = doc(db, "roles", user.email);
+    const roleDocSnapshot = await getDoc(roleDocRef);
 
-      if (roleDocSnapshot.exists()) {
-        const userDetail = roleDocSnapshot.data();
+    if (roleDocSnapshot.exists()) {
+      const userDetail = roleDocSnapshot.data();
 
-        // Récupérer les informations supplémentaires depuis "users"
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnapshot = await getDoc(userDocRef);
+      // Récupérer les informations supplémentaires depuis "users"
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
 
-        return {
-          ...user,
-          ...userDetail,
-          ...(userDocSnapshot.exists() ? userDocSnapshot.data() : {}),
-        };
-      } else {
-        console.warn(
-          "Aucun détail utilisateur trouvé pour cet email :",
-          user.email
-        );
-        return user; // Renvoie l'utilisateur Firebase de base
-      }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des détails utilisateur :",
-        error
+      return {
+        ...user,
+        ...userDetail,
+        ...(userDocSnapshot.exists() ? userDocSnapshot.data() : {}),
+      };
+    } else {
+      console.warn(
+        "Aucun détail utilisateur trouvé pour cet email :",
+        user.email
       );
-      throw error; // Lancer l'erreur pour qu'elle soit gérée par l'appelant
+      return user; // Renvoie l'utilisateur Firebase de base
     }
-  };
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des détails utilisateur :",
+      error
+    );
+    throw error; // Lancer l'erreur pour qu'elle soit gérée par l'appelant
+  }
+}
 
-  async function GetCompanyData () {
-    try {
-      console.log("Chargement des données d'entreprise...")
-      const companiesSnapshot = await getDocs(collection(db, "companies"));
+async function GetCompanyData() {
+  try {
+    console.log("Chargement des données d'entreprise...");
+    const companiesSnapshot = await getDocs(collection(db, "companies"));
 
-      if (!companiesSnapshot.empty) {
-        // Prendre la première entreprise trouvée
-        const firstCompany = companiesSnapshot.docs[0];
-        return {
-          id: firstCompany.id,
-          ...firstCompany.data(),
-        };
-      } else {
-        console.warn("Aucune entreprise trouvée dans la collection.");
-        return null; // Retourne null si aucune entreprise n'existe
-      }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des données d'entreprise :",
-        error
-      );
-      throw error; // Lancer l'erreur pour qu'elle soit gérée par l'appelant
+    if (!companiesSnapshot.empty) {
+      // Prendre la première entreprise trouvée
+      const firstCompany = companiesSnapshot.docs[0];
+      return {
+        id: firstCompany.id,
+        ...firstCompany.data(),
+      };
+    } else {
+      console.warn("Aucune entreprise trouvée dans la collection.");
+      return null; // Retourne null si aucune entreprise n'existe
     }
-  };
-
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des données d'entreprise :",
+      error
+    );
+    throw error; // Lancer l'erreur pour qu'elle soit gérée par l'appelant
+  }
+}
 
 /**
  * Met à jour les informations utilisateur (nom, prénom, email) dans Firestore.
@@ -69,7 +74,7 @@ import { db } from "./Base.js";
  * @param {Object} data - Les données à mettre à jour (par ex. {firstName, lastName}).
  * @returns {Promise<void>}
  */
-  const UpdateUserProfile = async (userId, data) => {
+const UpdateUserProfile = async (userId, data) => {
   if (!userId || !data) {
     throw new Error("User ID and data are required.");
   }
@@ -78,11 +83,13 @@ import { db } from "./Base.js";
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, data);
   } catch (error) {
-    console.error("Erreur lors de la mise à jour des informations utilisateur :", error);
+    console.error(
+      "Erreur lors de la mise à jour des informations utilisateur :",
+      error
+    );
     throw error;
   }
 };
-
 
 /**
  * Ajoute ou retire un produit des favoris de l'utilisateur.
@@ -104,7 +111,12 @@ async function ToggleFavorite(
   }
 
   try {
-    console.log("ToogleFavorite pour le matériau " + materialId + " : " + !currentFavoriteStatus)
+    console.log(
+      "ToogleFavorite pour le matériau " +
+        materialId +
+        " : " +
+        !currentFavoriteStatus
+    );
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
 
@@ -172,25 +184,34 @@ function GetUserAlarms(currentUser, reservations) {
   // Initialisation des compteurs d'alarmes
   const alarms = {
     userAlarms: 0, // Alarmes utilisateur
+    profileAlarms: 0, // Alarmes profile
     adminAlarms: 0, // Alarmes administration (seulement pour admin)
   };
 
   // Parcourir les réservations
   reservations.forEach((reservation) => {
     // Alarmes utilisateur : état 5 ou 8
-    if (reservation.state === 5 || reservation.state === 8) {
+    if (reservation.userId === currentUser.uid &&( reservation.state === 5 || reservation.state === 8)) {
       alarms.userAlarms++;
     }
 
     // Alarmes admin : état 0 (uniquement si l'utilisateur est admin)
-    if (currentUser.role === 'admin' && reservation.state === 0) {
+    if (currentUser.role === "admin" && reservation.state === 0) {
       alarms.adminAlarms++;
     }
   });
 
+  if(!currentUser.firstName)
+    alarms.profileAlarms = 1;
+
   return alarms;
 }
 
-
-export { GetUserData, GetCompanyData, UpdateUserProfile, ToggleFavorite, GetAllFavorites, GetUserAlarms };
-
+export {
+  GetUserData,
+  GetCompanyData,
+  UpdateUserProfile,
+  ToggleFavorite,
+  GetAllFavorites,
+  GetUserAlarms,
+};

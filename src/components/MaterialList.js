@@ -60,7 +60,7 @@ function MaterialList({ currentUser, storageView = false, companyId, storageId }
   return (
     <div className="sm:m-3">
       {/* Filtres pour catégories et sous-catégories */}
-      <div className="m-5 flex">
+      <div className="flex flex-wrap m-5 ">
         <div className="m-2">
           <label htmlFor="filter"></label>
           <select
@@ -88,7 +88,7 @@ function MaterialList({ currentUser, storageView = false, companyId, storageId }
               value={subcategoryFilter}
               onChange={(e) => setSubcategoryFilter(e.target.value)}
             >
-              <option value=""><UiTextLight text={"Toutes les sous-catégories"} /></option>
+              <option value="">Toutes les sous-catégories</option>
               {Categories
                 .find((catGroup) => catGroup.group === categoryFilter)
                 .subcategories.map((subcat) => (

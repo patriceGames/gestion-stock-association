@@ -1,9 +1,5 @@
 const Categories = [
     {
-      group: 'Aménagements Exterieurs - VRD',
-      subcategories: ['Paysage', 'Réseaux', 'Voierie', 'Déblais'],
-    },
-    {
       group: 'Aménagement intérieur',
       subcategories: ['Mobilier', 'Décorations'],
     },
@@ -13,7 +9,7 @@ const Categories = [
     },
     {
       group: 'Menuiseries',
-      subcategories: ['Menuiseries intérieur Bois', 'Cloisons sèches'],
+      subcategories: ['Menuiseries intérieures', 'Menuiseries extérieures', 'Fenêtres'],
     },
     {
       group: 'Serrurerie métallerie',

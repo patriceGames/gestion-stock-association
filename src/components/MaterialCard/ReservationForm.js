@@ -30,11 +30,10 @@ function ReservationForm({
       if (quantity > realAvailableQuantity) {
         setError(`La quantité ne peut pas dépasser ${realAvailableQuantity}.`);
         return;
-      } else if(quantity === 0 )
-        {
-          setError(`La quantité doit être supérieure à 0`);
-          return;
-        } else {
+      } else if (quantity === 0) {
+        setError(`La quantité doit être supérieure à 0`);
+        return;
+      } else {
         setError(""); // Réinitialiser l'erreur si la valeur est correcte
       }
     }

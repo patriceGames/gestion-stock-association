@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MaterialTable from "./MaterialTable";
 import { getMaterials, getStorage } from "./firebase";
-import { UiTextBold, UiTextLight, UiTitleMain, UiTitleSecondary } from "./UI/Ui";
+import { UiSecondaryCard, UiTextBold, UiTextLight, UiTitleMain, UiTitleSecondary } from "./UI/Ui";
 
 function StorageDetail({ currentUser, company }) {
   const { storageId, companyId } = useParams();
@@ -37,7 +37,7 @@ function StorageDetail({ currentUser, company }) {
   }
 
   return (
-    <div className="px-8 pt-3">
+    <UiSecondaryCard>
       <button
         onClick={() => navigate(`/company/${companyId}/storage`)}
         className="flex items-center text-blue-500 mb-4"
@@ -87,7 +87,7 @@ function StorageDetail({ currentUser, company }) {
         currentUser={currentUser}
         storageId={storageId}
       />
-    </div>
+    </UiSecondaryCard>
   );
 }
 

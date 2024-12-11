@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useTable, useSortBy } from "react-table";
 import { UpdateReservation } from "../firebase"; // Ajoutez la fonction Firebase pour supprimer une réservation
-import { UiButton, UiModal, UiTextLight, UiTitleMain } from "../UI/Ui";
+import { UiButton, UiModal, UiSecondaryCard, UiTextLight, UiTitleMain } from "../UI/Ui";
 import { ReservationStateTranslate } from "../firebase/MaterialReservations";
 import ReservationDetails from "../ReservationManagement/ReservationDetails";
 
@@ -58,10 +58,15 @@ const Reservations = ({ currentUser, reservations, setReservations }) => {
     []
   );
 
+  const userReservations = useMemo(
+    () => reservations.filter((res) => res.userId === currentUser.uid),
+    [reservations, currentUser]
+  );
+
   const tableInstance = useTable(
     {
       columns,
-      data: reservations,
+      data: userReservations,
     },
     useSortBy
   );
@@ -80,8 +85,7 @@ const Reservations = ({ currentUser, reservations, setReservations }) => {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl p-8 mx-auto bg-white shadow-md rounded-lg">
+    <UiSecondaryCard>
         <UiTitleMain text={"Mes réservations"} />
         <table {...getTableProps()} className="min-w-full bg-white">
           <thead>
@@ -157,8 +161,7 @@ const Reservations = ({ currentUser, reservations, setReservations }) => {
             />
           </UiModal>
         )}
-      </div>
-    </div>
+    </UiSecondaryCard>
   );
 };
 

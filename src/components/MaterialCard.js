@@ -110,7 +110,7 @@ function MaterialCard({ currentUser, material, images }) {
 
 
   return (
-    <div className="max-w-3xl p-5 mx-auto rounded overflow-hidden bg-white">
+    <div className="sm:mx-auto sm:rounded sm:overflow-hidden bg-white">
       <ImageGallery
         images={images}
         currentImageIndex={currentImageIndex}

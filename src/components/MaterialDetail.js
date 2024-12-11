@@ -37,7 +37,7 @@ function MaterialDetail({ currentUser, connected }) {
 
   return (
     <div className="bg-neutral-100">
-      <div className="p-5">
+      <div className="sm:p-5">
         {/* Flèche de retour vers le hangar seulement si companyId est présent */}
         {(companyId || userId) && (
           <button

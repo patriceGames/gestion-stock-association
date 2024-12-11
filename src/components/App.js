@@ -32,6 +32,7 @@ function App() {
   const [hasAlarms, setHasAlarms] = useState(false);
   const [alarms, setAlarms] = useState({
     userAlarms: 0, // Alarmes utilisateur
+    profileAlarms: 0, // Alarmes profile
     adminAlarms: 0, // Alarmes administration (seulement pour admin)
   });
 
@@ -87,11 +88,6 @@ function App() {
       try {
         const resa = await GetUserReservations(currentUser);
         setReservations(resa);
-
-        // Vérification de la présence d'alarmes
-        const alarmData = GetUserAlarms(currentUser, resa);
-        setAlarms(alarmData);
-        setHasAlarms(Object.values(alarmData).some((count) => count > 0));
       } catch (error) {
         console.error("Erreur lors du chargement des réservations :", error);
       }
@@ -137,7 +133,6 @@ function App() {
             />
           </>
         )}
-
         {/* Gestion des routes */}
         <Routes>
           {connected ? (

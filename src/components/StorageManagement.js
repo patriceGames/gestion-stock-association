@@ -8,7 +8,7 @@ import {
 } from "./firebase"; // Import des fonctions Firebase
 import StorageList from "./StorageList"; // Import de la liste
 import StorageForm from "./StorageForm"; // Import du formulaire
-import { UiButton, UiTitleMain, UiTitleSecondary } from "./UI/Ui";
+import { UiButton, UiSecondaryCard, UiTitleMain, UiTitleSecondary } from "./UI/Ui";
 
 function StorageManagement({ company, currentUser }) {
   const [storages, setStorages] = useState([]);
@@ -106,8 +106,7 @@ function StorageManagement({ company, currentUser }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl p-8 mx-auto bg-white shadow-md rounded-lg">
+    <UiSecondaryCard>
       <UiTitleMain text={"Espaces de stockage"} />
         {/* Affichage de la liste des entrepôts */}
         <StorageList
@@ -148,8 +147,7 @@ function StorageManagement({ company, currentUser }) {
             setSelectedStorage={setSelectedStorage}
           />
         )}
-      </div>
-    </div>
+    </UiSecondaryCard>
   );
 }
 

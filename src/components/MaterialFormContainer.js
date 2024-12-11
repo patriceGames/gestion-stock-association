@@ -1,14 +1,13 @@
 import MaterialForm from "./MaterialForm";
 import { useNavigate, useParams } from "react-router-dom";
-import { UiTextLightSmall } from "./UI/Ui";
+import { UiSecondaryCard, UiTextLightSmall } from "./UI/Ui";
 
 function MaterialFormContainer({ currentUser, company }) {
   const { companyId, materialId, storageId, userId } = useParams();
   const navigate = useNavigate(); // Initialiser useNavigate pour permettre la navigation
 
   return (
-    <div className="flex lg:m-10 items-center justify-center ">
-      <div className="w-full md:w-2/3 xl:w-1/2 h-1/2 px-4 ">
+    <UiSecondaryCard>
         <button
           onClick={() => {
             navigate(
@@ -43,8 +42,7 @@ function MaterialFormContainer({ currentUser, company }) {
           currentUser={currentUser}
           company={company}
         />
-      </div>
-    </div>
+    </UiSecondaryCard>
   );
 }
 

@@ -8,7 +8,7 @@ function Header({ toggleSidebar, hasAlarms }) {
     navigate(`/`);
   };
   return (
-    <div className="bg-white">
+    <div className="flex w-full bg-whiteflex flex-col transform z-50 w-full">
       <div className="m-3">
         <div className="flex justify-between">
           <div

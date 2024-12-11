@@ -2,7 +2,7 @@ import React, { useState, useMemo} from "react";
 import { useTable, useSortBy } from "react-table";
 import { UpdateReservation } from "./firebase"; // Fonction Firebase
 import ReservationDetails from "./ReservationManagement/ReservationDetails";
-import { UiModal, UiTitleMain } from "./UI/Ui";
+import { UiModal, UiSecondaryCard, UiTitleMain } from "./UI/Ui";
 import { ReservationTable } from "./ReservationManagement/Table";
 import { ReservationStateTranslate } from "./firebase/MaterialReservations";
 import { format } from "date-fns";
@@ -84,8 +84,7 @@ const ReservationManagement = ({ currentUser, company, reservations, setReservat
   );  
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl p-8 mx-auto bg-white shadow-md rounded-lg">
+    <UiSecondaryCard>
         <UiTitleMain text={"Réservations"} />
         <ReservationTable
           tableInstance={pendingTableInstance}
@@ -113,8 +112,7 @@ const ReservationManagement = ({ currentUser, company, reservations, setReservat
             />
           </UiModal>
         )}
-      </div>
-    </div>
+    </UiSecondaryCard>
   );
 };
 
