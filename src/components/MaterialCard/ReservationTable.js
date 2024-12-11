@@ -6,9 +6,10 @@ import {
   AddReservation,
   UpdateReservation,
   GetReservations,
-  DeleteReservation,
-} from "./firebase"; // Importez vos fonctions CRUD pour les réservations.
+  UpdateMaterialProperty,
+} from "../firebase.js"; // Importez vos fonctions CRUD pour les réservations.
 import ReservationForm from "./ReservationForm.js";
+import { UiButton, UiTextBook, UiTextLightSmall } from "../UI/Ui.js";
 
 function ReservationTable({
   currentUser,
@@ -22,19 +23,48 @@ function ReservationTable({
   const [selectedReservation, setSelectedReservation] = useState(null);
 
   const loadReservations = async () => {
-    const reservationsData = await GetReservations(material.id);
-    const formattedReservations = reservationsData.map((reservation) => ({
-      ...reservation,
-      date: reservation.date?.toDate().toLocaleString() || "No Date",
-    }));
-    setReservations(formattedReservations);
+    if (totalQuantity > 0) {
+      // Charger les données de réservation
+      const reservationsData = await GetReservations(material.id);
+      const formattedReservations = reservationsData.map((reservation) => ({
+        ...reservation,
+        date: reservation.date?.toDate().toLocaleString() || "No Date",
+      }));
+      setReservations(formattedReservations);
 
-    // Recalculer la quantité réservée après avoir défini les réservations
-    const reservedQuantity = formattedReservations.reduce(
-      (total, reservation) => total + Number(reservation.quantity || 0),
-      0
-    );
-    setQuantityAvailable(totalQuantity - reservedQuantity);
+      // Recalculer la quantité réservée
+      const reservedQuantity = formattedReservations.reduce(
+        (total, reservation) => total + Number(reservation.quantity || 0),
+        0
+      );
+
+      // Calculer la nouvelle quantité disponible
+      const newQuantityAvailable = totalQuantity - reservedQuantity;
+
+      // Mise à jour locale
+      setQuantityAvailable(newQuantityAvailable);
+
+      // Comparer directement avec newQuantityAvailable pour éviter le décalage
+      if (newQuantityAvailable !== material.quantityAvailable) {
+        // Mettre à jour localement la quantité disponible
+        material.quantityAvailable = newQuantityAvailable;
+
+        // Mettre à jour la propriété "quantityAvailable" dans Firestore
+        UpdateMaterialProperty(
+          { quantityAvailable: newQuantityAvailable },
+          material.id
+        )
+          .then(() => {
+            console.log("Quantité disponible mise à jour avec succès !");
+          })
+          .catch((error) => {
+            console.error(
+              "Erreur lors de la mise à jour de la quantité disponible :",
+              error
+            );
+          });
+      }
+    }
   };
 
   // Utilisation de useEffect pour éviter les appels répétés
@@ -55,14 +85,15 @@ function ReservationTable({
 
   const columns = useMemo(
     () => [
-      { Header: "Nom d'utilisateur", accessor: "userName" },
-      { Header: "Projet", accessor: "projetName" },
-      { Header: "Quantité", accessor: "quantity" },
+      { Header: "Réservataire", accessor: "userName" },
+      { Header: "Site destination", accessor: "projectName" },
+      { Header: "Qt", accessor: "quantity" },
       { Header: "Date", accessor: "date" },
+      { Header: "Statut", accessor: "stateExplicit" },
       {
         id: "edit",
         Header: "",
-        Cell: ({ row }) => (
+        Cell: ({ row }) => (row.original.state === 0 &&
           <button
             onClick={() => openEditPopUp(row.original)}
             className="text-blue-500 hover:underline w-1"
@@ -89,27 +120,29 @@ function ReservationTable({
     tableInstance;
 
   const handleAddReservation = async (newReservation) => {
-    console.log(newReservation);
-    await AddReservation(currentUser, material.id, newReservation);
+    console.log(currentUser + "\n" + currentUser);
+    newReservation.materialName = material.name;
+    await AddReservation(
+      currentUser,
+      material.id,
+      newReservation
+    );
     loadReservations(); // Rechargez les réservations après ajout
     closeEditPopUp();
   };
 
   const handleUpdateReservation = async (updatedReservation) => {
     if (selectedReservation) {
-      await UpdateReservation(
-        material.id,
-        selectedReservation.id,
-        updatedReservation
-      );
+      await UpdateReservation(selectedReservation.id, updatedReservation);
       loadReservations(); // Rechargez les réservations après mise à jour
       closeEditPopUp();
     }
   };
 
-  const handleDeleteReservation = async (updatedReservation) => {
+  const handleDeleteReservation = async (e) => {
+    e.preventDefault();
     if (selectedReservation) {
-      await DeleteReservation(material.id, selectedReservation.id);
+      await UpdateReservation(selectedReservation.id, {state:10});
       loadReservations(); // Rechargez les réservations après mise à jour
       closeEditPopUp();
     }
@@ -127,10 +160,10 @@ function ReservationTable({
               {headerGroup.headers.map((column) => (
                 <th
                   {...column.getHeaderProps(column.getSortByToggleProps())}
-                  className="px-6 py-2 border-b-2 border-gray-200 cursor-pointer"
+                  className="px-3 py-2 border-b-2 border-gray-200 cursor-pointer text-left"
                   key={column.id}
                 >
-                  {column.render("Header")}
+                  <UiTextBook text={column.render("Header")} />
                   <span>
                     {column.isSorted
                       ? column.isSortedDesc
@@ -156,10 +189,13 @@ function ReservationTable({
                 {row.cells.map((cell) => (
                   <td
                     {...cell.getCellProps()}
-                    className="px-6 py-4 border-b border-gray-200"
+                    className="px-3 py-1 border-b border-gray-200"
                     key={cell.column.id}
                   >
-                    {cell.render("Cell")}
+                    <UiTextLightSmall
+                      text={cell.render("Cell")}
+                      color={"gray-600"}
+                    />
                   </td>
                 ))}
               </tr>
@@ -169,17 +205,12 @@ function ReservationTable({
       </table>
 
       <div className="flex justify-center items-center mt-4">
-        <button
-          onClick={() => openEditPopUp(null)} // Null pour ajouter une nouvelle réservation
-          className={`px-4 py-2 rounded ${
-            quantityAvailable === 0
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-blue-500 text-white"
-          }`}
-          disabled={quantityAvailable === 0} // Désactiver le bouton si la quantité disponible est 0
-        >
-          <FontAwesomeIcon icon={faPlus} /> Ajouter une réservation
-        </button>
+        <UiButton
+          icon={faPlus}
+          text={" Ajouter une réservation"}
+          action={() => openEditPopUp(null)}
+          enabled={quantityAvailable === 0}
+        />
       </div>
 
       {/* Popup D'ajout / modification de réservation */}

@@ -4,36 +4,48 @@ const Categories = [
       subcategories: ['Paysage', 'Réseaux', 'Voierie', 'Déblais'],
     },
     {
-      group: 'Gros oeuvre - Maçonnerie',
-      subcategories: ['Elements Béton', 'Cloisons maçonnées', 'Pierre', 'Structure métalique', 'Escalier maçonné'],
+      group: 'Aménagement intérieur',
+      subcategories: ['Mobilier', 'Décorations'],
     },
     {
-      group: 'Charpente - Couverture',
-      subcategories: ['Charpente Bois', 'Charpente Métalique', 'Etanchéité', 'Couverture', 'Zinguerie', 'Menuiserie de toiture'],
+      group: 'Second oeuvre',
+      subcategories: ['Isolations','Faux plafond', 'Cloisons'],
     },
     {
-      group: 'Façade - Isolation - Etanchéité',
-      subcategories: ['Bardage', 'Isolant', 'Menuiseries Extérieures', 'Fermetures'],
-    },
-    {
-      group: 'Aménagements - Menuiseries intérieures',
-      subcategories: ['Menuiseries intérieur Bois', 'Cloisons sèches', 'Faux plafond', 'Quincaillerie', 'Décoration', 'Escaliers'],
+      group: 'Menuiseries',
+      subcategories: ['Menuiseries intérieur Bois', 'Cloisons sèches'],
     },
     {
       group: 'Serrurerie métallerie',
       subcategories: ['Garde corps', 'Escaliers', 'Clôture', 'Porte'],
     },
     {
-      group: 'Revêtements sols et murs',
-      subcategories: ['Revêtements sols', 'Revêtements murs'],
+      group: 'Electricité - Ventilations - Luminaires',
+      subcategories: [],
     },
     {
-      group: 'Lots Techniques',
-      subcategories: ['Plomberie sanitaire', 'Chauffage', 'Electricité CF', 'Climatisation', 'Ventilation', 'Ascenseurs', 'Chambre froide'],
+      group: 'Chauffage - Plomberie',
+      subcategories: [],
+    },
+    {
+      group: 'Revêtements',
+      subcategories: ['Sol souple', 'Parquet', 'Peinture', 'Carrelage', 'Bardage'],
+    },
+    {
+      group: 'Equipement informatique - Electronique',
+      subcategories: [],
+    },
+    {
+      group: 'Electroménager',
+      subcategories: [],
+    },
+    {
+      group: 'Vie quotidienne',
+      subcategories: ['Fournitures', 'Hygiène', 'Textiles'],
     },
     {
         group: 'Autres',
-        subcategories: ['Equipements sportifs', 'Mobilier', 'Mobilier de cuisine', 'Décoration', 'Outillage'],
+        subcategories: ['Equipements sportifs', 'Mobilier de cuisine', 'Outillage', 'Quincaillerie'],
     },
   ];
   

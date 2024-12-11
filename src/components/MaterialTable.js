@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faEdit } from "@fortawesome/free-solid-svg-icons";
 import MaterialForm from "./MaterialForm";
+import { UiTextBold, UiTextBook, UiTextLight } from "./UI/Ui";
 
-function MaterialTable({ company, currentUser, materials, storageId, currentUserDetail }) {
+function MaterialTable({ company, currentUser, materials, storageId }) {
   const navigate = useNavigate();
 
+  console.log("Render MaterialTable");
   // État pour contrôler l'ouverture de la modale de modification
   const [isEditPopUpOpen, setIsEditPopUpOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -16,6 +18,7 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
     setSelectedMaterial(material);
     setIsEditPopUpOpen(true);
   };
+
 
   const closeEditpopUp = () => {
     setIsEditPopUpOpen(false);
@@ -32,7 +35,7 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
         id: "edit",
         Header: "",
         Cell: ({ row }) => (
-          (currentUserDetail?.role === 'admin' && <button
+          (currentUser?.role === 'admin' && <button
             onClick={() => openEditPopUp(row.original)}
             className="text-blue-500 hover:underline w-1"
           >
@@ -47,7 +50,7 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
           <button
             onClick={() =>
               navigate(
-                `/company/${company.id}/storage/${storageId}/product/${row.original.id}`
+                `/company/${company.id}/storage/${storageId}/material/${row.original.id}`
               )
             }
             className="text-blue-500 hover:underline w-1"
@@ -57,7 +60,7 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
         ),
       },
     ],
-    [navigate, company, storageId, currentUserDetail]
+    [navigate, company, storageId, currentUser]
   );
 
   // Initialisation de React Table
@@ -125,7 +128,7 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
                     {...headerProps}
                     className="px-6 py-2 border-b-2 border-gray-200 cursor-pointer"
                   >
-                    {column.render("Header")}
+                    {<UiTextBold text={column.render("Header")} />}
                     <span>
                       {column.isSorted
                         ? column.isSortedDesc
@@ -155,9 +158,9 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
                     <td
                       key={cell.column.id}
                       {...cellProps}
-                      className="px-6 py-4 border-b border-gray-200"
+                      className="px-6 py-2 border-b border-gray-200"
                     >
-                      {cell.render("Cell")}
+                      {<UiTextLight text={cell.render("Cell")} />}
                     </td>
                   );
                 })}
@@ -168,10 +171,10 @@ function MaterialTable({ company, currentUser, materials, storageId, currentUser
       </table>
 
       <div className="mt-4">
-        <h3>Éléments sélectionnés :</h3>
+        <h3>{<UiTextBook text={"Éléments sélectionnés :"} />}</h3>
         <ul>
           {selectedFlatRows.map((row) => (
-            <li key={row.original.id}>{row.original.name}</li>
+            <li key={row.original.id}>{<UiTextBook text={row.original.name} />}</li>
           ))}
         </ul>
       </div>

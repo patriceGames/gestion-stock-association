@@ -14,7 +14,6 @@ const DimensionsAndCondition = ({ formData, handleChange }) => {
           placeholder=" "
           value={dimensions}
           onChange={handleChange} // Utilise handleChange pour gérer les changements
-          required
         />
         <label
           htmlFor="floating_dimensions"

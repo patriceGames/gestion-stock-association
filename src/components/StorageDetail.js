@@ -1,103 +1,91 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getDoc, doc } from 'firebase/firestore';
-import MaterialTable from './MaterialTable';
-import { db, getMaterials } from './firebase';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import MaterialTable from "./MaterialTable";
+import { getMaterials, getStorage } from "./firebase";
+import { UiTextBold, UiTextLight, UiTitleMain, UiTitleSecondary } from "./UI/Ui";
 
-function StorageDetail({currentUser, company}) {
+function StorageDetail({ currentUser, company }) {
   const { storageId, companyId } = useParams();
   const navigate = useNavigate();
   const [storage, setStorage] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserDetail, setCurrentUserDetail] = useState(null);
 
-  useEffect(() => {
-    const fetchUserDetail = async () => {
-      try {
-        if (!currentUser) {
-          console.error('No user is currently authenticated.');
-          return;
-        }
-        const userDetailRef = doc(db, 'roles', currentUser.uid);
-        const userDetailSnapshot = await getDoc(userDetailRef);
-        if (userDetailSnapshot.exists()) {
-          setCurrentUserDetail(userDetailSnapshot.data());
-        } else {
-          console.error('User details not found.');
-          return;
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des employés :', error);
-      }
-      setLoading(false);
-    };
-  
-    fetchUserDetail();
-  }, [currentUser]);
-
-  const loadMaterials = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: fetchedMaterials } = await getMaterials({ storageId });
-      setMaterials(fetchedMaterials);
-    } catch (error) {
-      console.error('Erreur lors du chargement des matériaux:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [storageId]);
+  console.log("Render StorageDetail");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storageRef = doc(db, 'companies', companyId, 'storages', storageId);
-        const storageDoc = await getDoc(storageRef);
-        if (storageDoc.exists()) {
-          setStorage(storageDoc.data());
-        }
+        const storageDoc = await getStorage(storageId);
+        setStorage(storageDoc);
 
-        await loadMaterials();
+        const { data: fetchedMaterials } = await getMaterials({ storageId });
+        setMaterials(fetchedMaterials);
+        setLoading(false);
       } catch (error) {
-        console.error('Erreur lors de la récupération des détails :', error);
+        console.error("Erreur lors de la récupération des détails :", error);
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [storageId, companyId, loadMaterials]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
   if (loading) {
     return <h2>Chargement des informations...</h2>;
   }
 
   return (
-    <div className="p-8">
-      <button onClick={() => navigate(`/company/${companyId}`)} className="flex items-center text-blue-500 mb-4">
-        <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    <div className="px-8 pt-3">
+      <button
+        onClick={() => navigate(`/company/${companyId}/storage`)}
+        className="flex items-center text-blue-500 mb-4"
+      >
+        <svg
+          className="w-6 h-6 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
-        Retour à {company?.name || "l'entreprise"}
+        <UiTextLight text={"Retour"} />
       </button>
 
       <div className="flex items-start mb-8">
         {storage?.imageUrl && (
-          <img src={storage.imageUrl} alt={storage.name} className="w-1/3 h-auto rounded mr-6 object-cover max-w-full max-h-96" />
+          <img
+            src={storage.imageUrl}
+            alt={storage.name}
+            className="w-40 h-40 rounded mr-6 object-cover"
+          />
         )}
         <div>
-          <h1 className="text-2xl font-bold mb-4">{storage?.name}</h1>
-          <p><strong>Adresse :</strong> {storage?.address}</p>
-          <p><strong>Description :</strong> {storage?.description}</p>
+          {/* Titre principal */}
+          <UiTitleMain text={storage.name} />
+
+          <UiTextBold text="Adresse : " />
+          <UiTextLight text={storage?.address} />
+
+          <br/>
+          <UiTextBold text="Description : " />
+          <UiTextLight text={storage?.description} />
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold mb-2">Matériaux stockés</h2>
-      <MaterialTable 
-        materials={materials} 
-        company={company} 
-        currentUser={currentUser} 
-        storageId={storageId} 
-        currentUserDetail={currentUserDetail}
+      <UiTitleSecondary text={"Matériaux stockés"} />
+      <MaterialTable
+        materials={materials}
+        company={company}
+        currentUser={currentUser}
+        storageId={storageId}
       />
     </div>
   );

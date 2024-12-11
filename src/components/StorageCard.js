@@ -1,6 +1,7 @@
 import React from 'react';
-import { FaEdit } from 'react-icons/fa';  // Icône d'édition
-import { Link } from 'react-router-dom';  // Utilisation de Link pour la navigation
+import { FaEdit } from 'react-icons/fa'; // Icône d'édition
+import { Link } from 'react-router-dom'; // Utilisation de Link pour la navigation
+import { UiTextBold, UiTextLight } from './UI/Ui';
 
 function StorageCard({ storage, onEditClick, companyId }) {
   return (
@@ -17,11 +18,24 @@ function StorageCard({ storage, onEditClick, companyId }) {
       </button>
 
       <Link to={`/company/${companyId}/storage/${storage.id}`} className="block">
-        {storage.imageUrl && (
-          <img src={storage.imageUrl} alt={storage.name} className="w-full h-48 object-cover rounded mb-4" />
+        {storage.imageUrl ? (
+          <img
+            src={storage.imageUrl}
+            alt={storage.name}
+            className="w-full h-48 object-cover rounded mb-4"
+          />
+        ) : (
+          <div className="w-full h-48 flex items-center justify-center bg-gray-100 text-gray-500 italic rounded mb-4">
+            Pas d'image disponible
+          </div>
         )}
-        <p><strong>Nom :</strong> {storage.name}</p>
-        <p><strong>Adresse :</strong> {storage.address}</p>
+        <p>
+          <UiTextBold text={"Nom : "} /> <UiTextLight text={storage.name} />
+        </p>
+        <p>
+          <UiTextBold text={"Adresse : "} />{' '}
+          <UiTextLight text={storage.address} />
+        </p>
       </Link>
     </li>
   );

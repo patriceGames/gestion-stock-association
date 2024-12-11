@@ -22,7 +22,7 @@ const uploadImage = async (file) => {
   
       // Récupère l'URL de téléchargement de l'image après l'upload
       const downloadURL = await getDownloadURL(storageRef);
-  
+      console.log("image " + file.name + " uploadée")
       return downloadURL;
     } catch (error) {
       console.error("Erreur lors de l'upload de l'image :", error);

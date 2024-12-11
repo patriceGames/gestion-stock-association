@@ -1,122 +1,161 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-// Import Firestore
-import { db, auth } from "./firebase";
-import { doc, updateDoc, getDoc } from "firebase/firestore"; // Fonctions Firestore
+import { ToggleFavorite, getMaterial } from "./firebase";
+import {
+  UiTextBold,
+  UiTextLight,
+  UiTextLightSmall,
+  UiTextMedium,
+  UiTitleSecondary,
+} from "./UI/Ui";
 
-function MaterialListItem({ material, storageView, companyId, storageId }) {
-  // Ajoute l'ID de l'utilisateur
+function MaterialListItem({
+  material: initialMaterial, // Renommé pour éviter la confusion
+  materialId,
+  isFavorited,
+  onFavoriteToggle,
+  currentUser,
+  storageView,
+  userView,
+  companyId,
+  storageId,
+}) {
   const navigate = useNavigate();
-  const [isFavorited, setIsFavorited] = useState(false); // État pour suivre si le matériau est favori
-  const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
+  const [material, setMaterial] = useState(initialMaterial); // État local pour le matériau
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const user = auth.currentUser;
-  const userId = user?.uid; // Ajouter l'opérateur conditionnel pour éviter une erreur si l'utilisateur n'est pas connecté
+  const loadMaterial = useCallback(async () => {
+    if (!materialId) {
+      setMaterial(initialMaterial);
+      return;
+    }
 
-  useEffect(() => {
-    if (!userId || !material.id) return;
+    setIsLoading(true);
+    setError(null);
 
-    const loadFavoriteStatus = async () => {
-      try {
-        const userRef = doc(db, "users", userId); // Référence à l'utilisateur dans Firestore
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          if (userData.favorites && userData.favorites.includes(material.id)) {
-            setIsFavorited(true);
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des favoris :", error);
-      } finally {
-        setIsLoadingFavorite(false);
-      }
-    };
-    loadFavoriteStatus();
-  }, [material.id, userId]);
-
-  // Fonction pour gérer le clic sur le bouton favori
-  const handleFavoriteClick = async (e) => {
-    e.stopPropagation(); // Empêche de déclencher l'événement de redirection
-
-    if (userId && material.id) {
-      const userRef = doc(db, "users", userId); // Référence à l'utilisateur dans Firestore
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        let updatedFavorites = userData.favorites || [];
-
-        let updatedIsFavorited;
-        if (isFavorited) {
-          // Retirer des favoris
-          updatedFavorites = updatedFavorites.filter(
-            (fav) => fav !== material.id
+    try {
+      const materialData = await getMaterial(materialId); // Appel Firestore ou API
+      if (!materialData && userView) {
+        try {
+          await ToggleFavorite(currentUser.uid, materialId, true); // Retirer des favoris
+          console.log(
+            `Matériau ID ${materialId} retiré des favoris car il a été supprimé.`
           );
-          updatedIsFavorited = false;
-        } else {
-          // Ajouter aux favoris
-          updatedFavorites.push(material.id);
-          updatedIsFavorited = true;
+          onFavoriteToggle(materialId, false); // Mise à jour locale
+        } catch (err) {
+          console.error(
+            "Erreur lors de la suppression automatique des favoris :",
+            err
+          );
         }
-
-        // Mettre à jour Firestore
-        await updateDoc(userRef, { favorites: updatedFavorites });
-
-        // Mettre à jour l'état après la réussite de l'opération Firestore
-        setIsFavorited(updatedIsFavorited);
       }
+      setMaterial(materialData); // Mise à jour de l'état local
+    } catch (err) {
+      console.error("Erreur lors du chargement du matériau :", err);
+      setError("Erreur lors du chargement du matériau.");
+      setMaterial(null); // Considérer le matériau comme supprimé si erreur
+    } finally {
+      setIsLoading(false);
+    }
+  }, [materialId, initialMaterial, userView, currentUser.uid, onFavoriteToggle]);
+
+  // Charge le matériau si nécessaire
+  useEffect(() => {
+    if (!material && materialId) {
+      loadMaterial();
+    }
+  }, [material, materialId, loadMaterial]);
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+
+    // Vérifiez que le matériau est disponible ou que l'ID est défini
+    if (!currentUser?.uid || (!material && !materialId)) {
+      console.warn(
+        "Favoris non modifiables : matériau ou utilisateur non disponible."
+      );
+      return;
+    }
+
+    const idToToggle = material ? material.id : materialId;
+    try {
+      onFavoriteToggle(idToToggle, !isFavorited); // Mise à jour optimiste
+      await ToggleFavorite(currentUser.uid, idToToggle, isFavorited);
+      console.log(
+        `État du favori mis à jour : Matériau ID ${idToToggle}, État ${!isFavorited}`
+      );
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour des favoris :", err);
+      onFavoriteToggle(idToToggle, isFavorited); // Réversion en cas d'erreur
     }
   };
 
   const handleClick = () => {
-    // Redirige vers la page du produit en utilisant son ID
+    if (!material) return;
+
     navigate(
       storageView
-        ? `/company/${companyId}/storage/${storageId}/product/${material.id}`
-        : `/product/${material.id}`
+        ? `/company/${companyId}/storage/${storageId}/material/${material.id}`
+        : userView
+        ? `/user/${currentUser.uid}/material/${materialId}`
+        : `/material/${material.id}`
     );
   };
 
+  if (isLoading) {
+    return <UiTitleSecondary text={"Chargement du matériau..."} />;
+  }
+
+  if (error) {
+    return <UiTitleSecondary text={error} />;
+  }
+
+  if (!material) {
+    return (
+      <div className="h-full items-center">
+        <UiTextBold text={"Matériau supprimé"} />
+      </div>
+    );
+  }
+
   return (
     <li
-      key={material.id}
-      className="w-full cursor-pointer max-w-sm mx-auto rounded-md shadow-md overflow-hidden relative"
+      className="w-full cursor-pointer max-w-sm mx-auto rounded-sm shadow-md overflow-hidden relative"
       onClick={handleClick}
     >
       <div
-        className="flex items-end justify-end h-56 w-full bg-cover bg-center"
+        className="flex items-end justify-end h-40 w-full bg-cover bg-center"
         alt={"Image " + material.name}
         style={{
           backgroundImage: `url(${material.imageUrl1})`,
         }}
       >
-        {
-          /* Icône de cœur pour les favoris */
-
-          isLoadingFavorite ? (
-            <button className="absolute top-2 right-2 text-white bg-white p-2 rounded-full">
-              {/* Icône de chargement */}
-              🔄
-            </button>
-          ) : (
-            <button
-              onClick={handleFavoriteClick}
-              className="absolute top-2 right-2 text-white bg-white p-2 rounded-full"
-              aria-label={
-                isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"
-              }
-            >
-              {isFavorited ? "❤️" : "🤍"}
-            </button>
-          )
-        }
+        <button
+          onClick={!isLoading ? handleFavoriteClick : null} // Ne déclenche pas le clic si en cours de chargement
+          disabled={isLoading || !currentUser?.uid}
+          className={`absolute top-2 right-2 text-white bg-white p-2 rounded-full ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          aria-label={
+            isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"
+          }
+        >
+          {isLoading ? "⏳" : isFavorited ? "❤️" : "🤍"}
+        </button>
       </div>
       <div className="px-5 py-3">
-        <h3 className="text-gray-700 font-bold uppercase">{material.name}</h3>
-        {/* Affichage de l'état du produit */}
-        <p className="text-gray-600">État : {material.condition}</p>
-        {/* Affichage de la quantité disponible */}
-        <p className="text-gray-600">Quantité : {material.quantityAvailable}</p>
+        <UiTextMedium text={material.name} />
+        <p>
+          <UiTextLightSmall
+            text={`État : ${material.condition}`}
+            color={"gray-600"}
+          />
+        </p>
+        <p>
+          <UiTextLightSmall text={"Quantité : "} color={"gray-600"} />
+          <UiTextLight text={material.quantityAvailable} />
+        </p>
       </div>
     </li>
   );

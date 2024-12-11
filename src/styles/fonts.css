@@ -1,0 +1,41 @@
+@font-face {
+  font-family: "GoBold";
+  src: url("/fonts/gobold/Gobold Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "GoBold";
+  src: url("/fonts/gobold/Gobold Thin.woff2") format("woff2");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/GothamLight.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/GothamBook.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/GothamMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/gotham/GothamBold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}

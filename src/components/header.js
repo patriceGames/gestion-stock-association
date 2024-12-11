@@ -1,17 +1,12 @@
-import logo from "../assets/HH.png";
+import logo from "../assets/Logo HHR.png";
 import { useNavigate } from "react-router-dom";
 
-function Header({ toggleSidebar }) {
+function Header({ toggleSidebar, hasAlarms }) {
   const navigate = useNavigate();
 
   const navigateHome = () => {
     navigate(`/`);
   };
-
-  const navigateAddMaterial = () => {
-    navigate(`/product/add`);
-  };
-
   return (
     <div className="bg-white">
       <div className="m-3">
@@ -20,38 +15,18 @@ function Header({ toggleSidebar }) {
             className="flex items-center cursor-pointer"
             onClick={navigateHome}
           >
-            <img src={logo} alt="Logo" className="h-8 w-8" />
-            <span className="ml-2 font-semibold text-base">
-              Habitat et humanisme
-            </span>
+            <img src={logo} alt="Logo" className="h-12 w-40 mr-2" />
           </div>
 
           <div className="ml-2 flex w-full justify-between">
-            <div
-              className="flex px-4 m-1 cursor-pointer items-center gap-x-1 rounded-md bg-[#EC751A] hover:bg-[#009EE0]"
-              onClick={navigateAddMaterial}
-            >
-              <span className="font-medium text-white">
-                + Ajouter un Produit
-              </span>
-            </div>
-
             <button
-              className="py-3 px-5 m-1 flex cursor-pointer items-center gap-x-1 rounded-md bg-[#F8C9A7] hover:bg-[#ACE7FF] ml-auto"
+              className="relative m-1 px-2 flex cursor-pointer items-center ml-auto text-3xl text-[#EC751A] rounded-lg hover:bg-gray-200"
               onClick={toggleSidebar}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 2a4 4 0 110 8 4 4 0 010-8zm0 10a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              ☰
+              {hasAlarms && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+              )}
             </button>
           </div>
         </div>

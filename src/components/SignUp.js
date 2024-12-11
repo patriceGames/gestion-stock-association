@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { signup } from './firebase';  // Importer la fonction signup
+import { UiButton, UiTitleSecondary } from './UI/Ui';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -28,10 +29,9 @@ const Signup = () => {
   };
 
   return (
-    <form onSubmit={handleSignup} className='w-full'>
-      <h2 className='text-xl font-bold mb-4 text-center'>Créer un compte</h2>
-
-      <div className='relative z-0 mb-6 w-full group'>
+    <form className='w-full'>
+      <UiTitleSecondary text={"Créer un compte"} />
+      <div className='relative z-0 my-6 w-full group'>
         <input
           type='email'
           name='floating_email'
@@ -70,13 +70,7 @@ const Signup = () => {
       </div>
 
       <div className='flex justify-end'>
-        <button
-          type='submit'
-          className='text-white bg-[#EC751A] hover:bg-[#009EE0] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
-          disabled={signingUp}
-        >
-          {signingUp ? "Inscription en cours..." : "S'inscrire"}
-        </button>
+        <UiButton text={signingUp ? "Inscription en cours..." : "S'inscrire"} action={handleSignup} enabled={signingUp}/>
       </div>
     </form>
   );

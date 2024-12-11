@@ -20,6 +20,7 @@ import { DeleteImage, UploadImages } from "./firebaseStorage.js";
 //create
 
 async function AddMaterial(user, formData, setFormData) {
+  console.log("Ajout du matériau " + formData.name);
   try {
     const images = [
       formData.image1,
@@ -35,17 +36,17 @@ async function AddMaterial(user, formData, setFormData) {
       name: formData.name,
       description: formData.description,
       dimensions: formData.dimensions,
+      warning: formData.warning,
       quantity: formData.quantity,
+      quantityAvailable: formData.quantity,
       condition: formData.condition,
-      category: `${formData.category} - ${formData.subcategory}`,
+      category: `${formData.category} | ${formData.subcategory}`,
       imageUrl1: imageUrl1,
       imageUrl2: imageUrl2,
       imageUrl3: imageUrl3,
       imageUrl4: imageUrl4,
       imageUrl5: imageUrl5,
-      storageId:
-        formData.locationType === "dropdown" ? formData.selectedStorage : null,
-      location: formData.locationType === "text" ? formData.location : null,
+      storageId: formData.selectedStorage,
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
       userId: user.uid,
@@ -57,6 +58,7 @@ async function AddMaterial(user, formData, setFormData) {
       category: "",
       subcategory: "",
       description: "",
+      warning: "",
       dimensions: "",
       quantity: "",
       condition: "",
@@ -65,18 +67,21 @@ async function AddMaterial(user, formData, setFormData) {
       image3: null,
       image4: null,
       image5: null,
-      locationType: "text",
-      location: "",
-      selectedStorage: "",
+      storageId: "",
     });
   } catch (error) {
     console.error("Erreur lors de l'ajout du matériau :", error);
   }
 }
 
-async function UpdateMaterial(user, formData, initialImages, materialId) {
+async function UpdateMaterial(formData, initialImages, materialId) {
+  console.log("Edition du matériau " + formData.name);
+
+  const imageKeys = ["image1", "image2", "image3", "image4", "image5"];
+  const images = imageKeys.map((key) => formData[key]); // Tableau des images (null ou File)
+
   const [imageUrl1, imageUrl2, imageUrl3, imageUrl4, imageUrl5] =
-    await UploadImages(formData);
+    await UploadImages(images);
 
   // Comparaison des images pour supprimer les anciennes si elles sont remplacées
   const newImages = {
@@ -86,31 +91,35 @@ async function UpdateMaterial(user, formData, initialImages, materialId) {
     imageUrl4,
     imageUrl5,
   };
+  
+  try {
   Object.keys(initialImages).forEach((key) => {
     if (initialImages[key] && initialImages[key] !== newImages[key]) {
       DeleteImage(initialImages[key]); // Supprime l'ancienne image si elle a été remplacée
     }
   });
+  }
+  catch (error) {
+    console.error("Erreur lors de la suppression des images :", error);
+  }
 
   try {
     const materialRef = doc(db, "materials", materialId);
     await updateDoc(materialRef, {
       name: formData.name,
       description: formData.description,
+      warning: formData.warning,
       dimensions: formData.dimensions,
       quantity: formData.quantity,
       condition: formData.condition,
-      category: `${formData.category} - ${formData.subcategory}`,
+      category: `${formData.category} | ${formData.subcategory}`,
       imageUrl1: imageUrl1,
       imageUrl2: imageUrl2,
       imageUrl3: imageUrl3,
       imageUrl4: imageUrl4,
       imageUrl5: imageUrl5,
-      storageId:
-        formData.locationType === "dropdown" ? formData.selectedStorage : null,
-      location: formData.locationType === "text" ? formData.location : null,
+      storageId: formData.selectedStorage,
       updatedAt: serverTimestamp(),
-      userId: user.uid,
     });
 
     alert("Matériau mis à jour avec succès !");
@@ -119,8 +128,44 @@ async function UpdateMaterial(user, formData, initialImages, materialId) {
   }
 }
 
+async function UpdateMaterialProperty(formData, materialId) {
+  try {
+    const materialRef = doc(db, "materials", materialId);
+
+    // Préparez l'objet pour la mise à jour en filtrant les valeurs non définies
+    const updateData = {
+      updatedAt: serverTimestamp(), // Ajoutez toujours un timestamp pour la mise à jour
+    };
+
+    // Ajoutez uniquement les champs présents dans formData
+    
+    if (formData.name !== undefined) updateData.name = formData.name;
+    if (formData.description !== undefined) updateData.description = formData.description;
+    if (formData.dimensions !== undefined) updateData.dimensions = formData.dimensions;
+    if (formData.warning !== undefined) updateData.warning = formData.warning;
+    if (formData.quantity !== undefined) updateData.quantity = formData.quantity;
+    if (formData.quantityAvailable !== undefined) updateData.quantityAvailable = formData.quantityAvailable;
+    if (formData.condition !== undefined) updateData.condition = formData.condition;
+    if (formData.category !== undefined && formData.subcategory !== undefined) {
+      updateData.category = `${formData.category} - ${formData.subcategory}`;
+    }
+    if (formData.selectedStorage !== undefined) updateData.storageId = formData.selectedStorage;
+    if (formData.locationType === "text" && formData.location !== undefined) {
+      updateData.location = formData.location;
+    }
+
+    // Mise à jour du document dans Firestore
+    await updateDoc(materialRef, updateData);
+
+    console.log("Matériau mis à jour avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du matériau :", error);
+  }
+}
+
 // Fonction pour récupérer un seul matériel par ID
 async function GetMaterialById(id) {
+  console.log("Lecture du matériau " + id);
   try {
     // Référence au document avec l'ID fourni dans la collection "materials"
     const docRef = doc(db, "materials", id);
@@ -174,11 +219,18 @@ async function DeleteMaterial(materialId) {
 
 
 const getMaterial = async (materialId) => {
+  console.log("Chargement des données du matériau " + materialId)
   if (materialId) {
     const materialRef = doc(db, "materials", materialId);
     const materialDoc = await getDoc(materialRef);
     if (materialDoc.exists()) {
-      return materialDoc.data();
+      
+      const materialData = {
+        id: materialDoc.id,
+        ...materialDoc.data(),
+      };
+
+      return materialData;
     }
   }
 };
@@ -188,12 +240,14 @@ const getMaterial = async (materialId) => {
 // Fonction pour récupérer les matériaux avec un tri défini et recherche par nom
 const getMaterials = async ({
   storageId = null,
+  userId = null,
   categoryFilter = "",
   subcategoryFilter = "",
   searchQuery = "", // Ajout du paramètre de recherche texte
   limitSize = null,
   lastVisible = null,
 }) => {
+  console.log("Lecture des matériaux ")
   // Base de la collection des matériaux
   const materialsRef = collection(db, "materials");
   let q = materialsRef;
@@ -201,6 +255,11 @@ const getMaterials = async ({
   // Construction de la requête avec les filtres conditionnels
   if (storageId) {
     q = query(materialsRef, where("storageId", "==", storageId));
+  }
+
+  // Construction de la requête avec les filtres conditionnels
+  if (userId) {
+    q = query(q, where("userId", "==", userId));
   }
 
   if (categoryFilter) {
@@ -271,4 +330,4 @@ const getMaterials = async ({
   };
 };
 
-export { AddMaterial, UpdateMaterial, getMaterial, getMaterials, GetMaterialById, DeleteMaterial};
+export { AddMaterial, UpdateMaterial, getMaterial, getMaterials, GetMaterialById, DeleteMaterial, UpdateMaterialProperty};

@@ -3,10 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { getMaterials } from './firebase.js';  // Import de la fonction de tri mutualisée
 import MaterialGrid from "./MaterialGrid";
 import Categories from "./Categories";
+import { UiTextLight, UiTitleSecondary } from "./UI/Ui.js";
 
 const PAGE_SIZE = 20;
 
-function MaterialList({ connected, storageView = false, companyId, storageId }) {
+function MaterialList({ currentUser, storageView = false, companyId, storageId }) {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();  // Utilisation des paramètres de recherche
@@ -53,7 +54,7 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
   };
 
   if (loading) {
-    return <h2>Chargement des matériaux...</h2>;
+    return <UiTitleSecondary text={"Chargement des matériaux..."} />;
   }
 
   return (
@@ -87,7 +88,7 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
               value={subcategoryFilter}
               onChange={(e) => setSubcategoryFilter(e.target.value)}
             >
-              <option value="">Toutes les sous-catégories</option>
+              <option value=""><UiTextLight text={"Toutes les sous-catégories"} /></option>
               {Categories
                 .find((catGroup) => catGroup.group === categoryFilter)
                 .subcategories.map((subcat) => (
@@ -101,12 +102,12 @@ function MaterialList({ connected, storageView = false, companyId, storageId }) 
       </div>
 
       {/* Affichage des matériaux */}
-      <MaterialGrid materials={materials} connected={connected} storageView={storageView} companyId={companyId} storageId={storageId}/>
+      <MaterialGrid materials={materials} currentUser={currentUser} storageView={storageView} companyId={companyId} storageId={storageId}/>
 
       {/* Pagination controls */}
       <div className="flex justify-center mt-10">
         <button onClick={loadNextPage} hidden={materials.length < PAGE_SIZE}>
-            Charger plus
+          <UiTextLight text={"Charger plus"} />
         </button>
       </div>
     </div>

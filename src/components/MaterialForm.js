@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { DeleteMaterial, getMaterial} from "./firebase";
+import { useNavigate, useParams } from "react-router-dom";
+import { DeleteMaterial, getMaterial } from "./firebase";
 import BasicInfo from "./MaterialForm/BasicInfo";
 import PriceAndQuantity from "./MaterialForm/PriceAndQuantity";
 import DimensionsAndCondition from "./MaterialForm/DimensionsAndCondition";
@@ -9,15 +9,17 @@ import Images from "./MaterialForm/Images";
 import Location from "./MaterialForm/Location";
 
 import { AddMaterial, UpdateMaterial } from "./firebase/Material";
+import { UiButton, UiTitleSecondary } from "./UI/Ui";
 
 const MaterialForm = ({
   baseMaterialId,
   closeEditpopUp,
   currentUser,
-  currentUserDetail,
   company,
 }) => {
   let { materialId } = useParams();
+  const navigate = useNavigate(); // Initialiser useNavigate pour permettre la navigation
+
   if (baseMaterialId) materialId = baseMaterialId;
 
   const [formData, setFormData] = useState({
@@ -25,6 +27,7 @@ const MaterialForm = ({
     category: "",
     subcategory: "",
     description: "",
+    warning: "",
     dimensions: "",
     quantity: "",
     condition: "",
@@ -39,6 +42,7 @@ const MaterialForm = ({
   });
 
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [initialImages, setInitialImages] = useState({}); // stocker les URLs d'images originales pour les comparer
 
   const handleChange = (e) => {
@@ -47,103 +51,125 @@ const MaterialForm = ({
   };
 
   const splitCategory = (category) => {
-    const [cat, subcat] = (category || "").split(" - ");
+    const [cat, subcat] = (category || "").split(" | ");
     return { cat: cat || "", subcat: subcat || "" };
   };
 
   useEffect(() => {
-    const material = getMaterial(materialId);
+    const LoadMaterial = async () => {
+      console.log("lecture du matériau préchargé " + materialId);
+      const material = await getMaterial(materialId);
 
-    setInitialImages({
-      imageUrl1: material.imageUrl1 || null,
-      imageUrl2: material.imageUrl2 || null,
-      imageUrl3: material.imageUrl3 || null,
-      imageUrl4: material.imageUrl4 || null,
-      imageUrl5: material.imageUrl5 || null,
-    });
+      setInitialImages({
+        imageUrl1: material.imageUrl1 || null,
+        imageUrl2: material.imageUrl2 || null,
+        imageUrl3: material.imageUrl3 || null,
+        imageUrl4: material.imageUrl4 || null,
+        imageUrl5: material.imageUrl5 || null,
+      });
 
-    const { cat, subcat } = splitCategory(material.category);
-    setFormData({
-      name: material.name,
-      category: cat,
-      subcategory: subcat,
-      description: material.description,
-      dimensions: material.dimensions,
-      quantity: material.quantity,
-      condition: material.condition,
-      image1: material.imageUrl1 || null,
-      image2: material.imageUrl2 || null,
-      image3: material.imageUrl3 || null,
-      image4: material.imageUrl4 || null,
-      image5: material.imageUrl5 || null,
-      locationType: material.storageId ? "dropdown" : "text",
-      location: material.location || "",
-      selectedStorage: material.storageId || "",
-    });
+      const { cat, subcat } = splitCategory(material.category);
+      setFormData({
+        name: material.name,
+        category: cat,
+        subcategory: subcat,
+        description: material.description,
+        dimensions: material.dimensions,
+        warning: material.warning,
+        quantity: material.quantity,
+        condition: material.condition,
+        image1: material.imageUrl1 || null,
+        image2: material.imageUrl2 || null,
+        image3: material.imageUrl3 || null,
+        image4: material.imageUrl4 || null,
+        image5: material.imageUrl5 || null,
+        locationType: material.storageId ? "dropdown" : "text",
+        location: material.location || "",
+        selectedStorage: material.storageId || "",
+      });
+    };
+
+    if (materialId) LoadMaterial();
+    setLoading(false);
   }, [materialId]);
-
-  const validateForm = () => {
-    const requiredFields = ["name", "category", "quantity"];
-    return requiredFields.every((field) => formData[field]);
-  };
 
   const handleAddMaterial = async (e) => {
     e.preventDefault();
-    const user = currentUser;
-
-    if (user) {
+    if (
+      formData.name &&
+      formData.category &&
+      formData.quantity &&
+      formData.condition &&
+      formData.selectedStorage
+    ) {
+      console.log("adding material");
       setUploading(true);
-
-      AddMaterial(user, formData, setFormData);
-    } else {
-      alert("Vous devez être connecté pour ajouter un matériau");
+      AddMaterial(currentUser, formData, setFormData);
+      setUploading(false);
     }
-
-    setUploading(false);
   };
 
   const handleUpdateMaterial = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      alert("Veuillez remplir tous les champs obligatoires.");
-      return;
+    if (
+      formData.name &&
+      formData.category &&
+      formData.quantity &&
+      formData.condition &&
+      formData.selectedStorage
+    ) {
+      console.log(
+        formData.name +
+          formData.category +
+          formData.quantity +
+          formData.condition +
+          formData.selectedStorage
+      );
+      if (materialId) {
+        setUploading(true);
+        UpdateMaterial(formData, initialImages, materialId);
+        setUploading(false);
+      }
+      if (baseMaterialId) closeEditpopUp();
     }
-
-    const user = currentUser;
-    if (user && materialId) {
-      setUploading(true);
-      UpdateMaterial(user, formData, initialImages, materialId);
-    } else {
-      alert("Vous devez être connecté pour modifier un matériau");
-    }
-
-    setUploading(false);
-    if (baseMaterialId) closeEditpopUp();
   };
 
-  const handleDeleteMaterial = async () => {
-    if (materialId) {
-      try {
-        await DeleteMaterial(materialId); // Appel à la fonction deleteMaterial
-        baseMaterialId && closeEditpopUp();
-      } catch (error) {
-        console.error("Erreur lors de la suppression du hangar:", error);
+  const handleDeleteMaterial = async (e) => {
+    e.preventDefault();
+    if (
+      formData.name &&
+      formData.category &&
+      formData.quantity &&
+      formData.condition &&
+      formData.selectedStorage
+    ) {
+      if (materialId) {
+        try {
+          await DeleteMaterial(materialId); // Appel à la fonction deleteMaterial
+          console.log("baseMaterialid : " + baseMaterialId);
+          baseMaterialId ? closeEditpopUp() : navigate(`/`);
+        } catch (error) {
+          console.error("Erreur lors de la suppression du hangar:", error);
+        }
       }
     }
   };
 
-  if (currentUserDetail?.role !== "admin")
+  if (currentUser?.role !== "admin")
     return (
-      <p>Vous n'avez pas les droits necessaires pour modifier ce matériau</p>
+      <UiTitleSecondary
+        text={
+          "Vous n'avez pas les droits necessaires pour modifier ce matériau"
+        }
+      />
     );
 
+  if (loading) return <UiTitleSecondary text={"Chargement..."} />;
+
   return (
-    currentUserDetail?.role === "admin" && (
+    currentUser?.role === "admin" && (
       <div>
-        <form
-          onSubmit={materialId ? handleUpdateMaterial : handleAddMaterial}
-          className="w-full"
-        >
+        <form className="w-full">
           <BasicInfo formData={formData} handleChange={handleChange} />
           <PriceAndQuantity formData={formData} handleChange={handleChange} />
           <DimensionsAndCondition
@@ -159,38 +185,33 @@ const MaterialForm = ({
             company={company}
           />
           <div className="flex justify-center h-15">
-            {baseMaterialId && (
-              <button
-                type="button"
-                onClick={() => {
-                  closeEditpopUp();
-                }}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded ml-4"
-              >
-                Annuler
-              </button>
-            )}
-            <button
-              type="submit"
-              className="text-white bg-blue-700 hover:bg-blue-800 ml-4 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1 text-center"
-              disabled={uploading}
-            >
-              {materialId
-                ? uploading
-                  ? "En cours..."
-                  : "Mettre à jour"
-                : uploading
-                ? "Création en cours..."
-                : "Créer le Matériau"}
-            </button>
+            <UiButton
+              text={
+                materialId
+                  ? uploading
+                    ? "En cours..."
+                    : "Mettre à jour"
+                  : uploading
+                  ? "Création en cours..."
+                  : "Créer le Matériau"
+              }
+              action={
+                materialId
+                  ? (e) => {
+                      handleUpdateMaterial(e);
+                    }
+                  : (e) => handleAddMaterial(e)
+              }
+              color={"blue"}
+              enabled={uploading}
+            />
             {materialId && (
-              <button
-                type="button"
-                onClick={handleDeleteMaterial}
-                className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded ml-4"
-              >
-                Supprimer
-              </button>
+              <UiButton
+                text={"Supprimer"}
+                action={(e) => handleDeleteMaterial(e)}
+                color={"red"}
+                enabled={uploading}
+              />
             )}
           </div>
         </form>
